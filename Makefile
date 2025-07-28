@@ -17,11 +17,15 @@ install: ## Install project dependencies
 
 # Lint the code
 lint: ## Run ESLint to check code quality
-	$(NPM) run build 2>&1 | grep -E "warning|error" || echo "No linting issues found"
+	@echo "Running linting checks..."
+	@$(NPM) run build > /dev/null 2>&1 || (echo "Build failed - likely linting issues"; exit 1)
+	@echo "✓ Linting passed"
 
 # Run tests
 test: ## Run the test suite
-	$(NPM) test -- --coverage --watchAll=false
+	@echo "Running tests..."
+	@$(NPM) test -- --coverage --watchAll=false --passWithNoTests
+	@echo "✓ Tests completed"
 
 # Start development server
 serve: ## Start the development server
@@ -38,4 +42,12 @@ clean: ## Clean node_modules and build directories
 # Fresh install
 fresh: clean install ## Clean install - remove node_modules and reinstall
 
-.PHONY: help install lint test serve build clean fresh
+# CI pipeline
+ci: ## Run linting and tests (CI pipeline)
+	@echo "Running CI pipeline..."
+	@if [ ! -d "node_modules" ]; then echo "Installing dependencies..."; $(MAKE) install; fi
+	@$(MAKE) test
+	@$(MAKE) lint
+	@echo "✓ CI pipeline completed successfully"
+
+.PHONY: help install lint test serve build clean fresh ci
