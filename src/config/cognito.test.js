@@ -1,8 +1,4 @@
-import {
-  cognitoConfig,
-  amplifyConfig,
-  validateCognitoConfig,
-} from '../cognito';
+import { cognitoConfig, amplifyConfig, validateCognitoConfig } from './cognito';
 
 describe('Cognito Configuration', () => {
   describe('cognitoConfig', () => {

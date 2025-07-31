@@ -2,12 +2,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { Login } from '../Login';
-import { AuthProvider } from '../../../contexts/AuthContext';
-import { authService } from '../../../services/authService';
+import { Login } from './Login';
+import { AuthProvider } from '../../contexts/AuthContext';
+import { authService } from '../../services/authService';
 
 // Mock the auth service
-jest.mock('../../../services/authService', () => ({
+jest.mock('../../services/authService', () => ({
   authService: {
     getCurrentUser: jest.fn(),
     signIn: jest.fn(),
