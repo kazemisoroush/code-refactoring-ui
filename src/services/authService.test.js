@@ -1,4 +1,4 @@
-import { AuthService } from '../authService';
+import { AuthService } from './authService';
 import { Auth } from 'aws-amplify';
 
 // Mock AWS Amplify Auth
