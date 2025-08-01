@@ -2,18 +2,18 @@ import React from 'react';
 
 import { Icon } from '@chakra-ui/react';
 import {
-  MdBarChart,
   MdPerson,
   MdHome,
   MdLock,
   MdOutlineShoppingCart,
+  MdFolder,
 } from 'react-icons/md';
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
-import DataTables from 'views/admin/dataTables';
+import Projects from 'views/admin/projects';
 import RTL from 'views/admin/rtl';
 
 // Auth Imports
@@ -43,11 +43,11 @@ const routes = [
     secondary: true,
   },
   {
-    name: 'Data Tables',
+    name: 'Projects',
     layout: '/admin',
-    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
-    path: '/data-tables',
-    component: <DataTables />,
+    icon: <Icon as={MdFolder} width="20px" height="20px" color="inherit" />,
+    path: '/projects',
+    component: <Projects />,
   },
   {
     name: 'Profile',

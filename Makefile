@@ -24,7 +24,7 @@ lint: ## Run ESLint to check code quality
 # Run tests
 test: ## Run the test suite
 	@echo "Running tests..."
-	@$(NPM) test -- --coverage --watchAll=false --passWithNoTests
+	@$(NPM) test -- --watchAll=false --passWithNoTests
 	@echo "✓ Tests completed"
 
 # Start development server
