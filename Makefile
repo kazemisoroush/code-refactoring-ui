@@ -46,8 +46,10 @@ fresh: clean install ## Clean install - remove node_modules and reinstall
 ci: ## Run linting and tests (CI pipeline)
 	@echo "Running CI pipeline..."
 	@if [ ! -d "node_modules" ]; then echo "Installing dependencies..."; $(MAKE) install; fi
+	@$(MAKE) install
 	@$(MAKE) test
 	@$(MAKE) lint
+	@$(MAKE) build
 	@echo "✓ CI pipeline completed successfully"
 
 .PHONY: help install lint test serve build clean fresh ci

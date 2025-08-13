@@ -1,17 +1,28 @@
 import { AuthService } from './authService';
-import { Auth } from 'aws-amplify';
+import { apiClient } from '../utils/apiClient';
+import { tokenStorage } from '../utils/tokenStorage';
 
-// Mock AWS Amplify Auth
-jest.mock('aws-amplify', () => ({
-  Auth: {
-    signIn: jest.fn(),
-    signUp: jest.fn(),
-    confirmSignUp: jest.fn(),
-    signOut: jest.fn(),
-    forgotPassword: jest.fn(),
-    forgotPasswordSubmit: jest.fn(),
-    currentAuthenticatedUser: jest.fn(),
-    resendSignUp: jest.fn(),
+// Mock the API client
+jest.mock('../utils/apiClient', () => ({
+  apiClient: {
+    post: jest.fn(),
+    get: jest.fn(),
+    handleResponse: jest.fn(),
+    handleError: jest.fn(),
+    refreshAccessToken: jest.fn(),
+  },
+}));
+
+// Mock token storage
+jest.mock('../utils/tokenStorage', () => ({
+  tokenStorage: {
+    setToken: jest.fn(),
+    setRefreshToken: jest.fn(),
+    setUser: jest.fn(),
+    getToken: jest.fn(),
+    getUser: jest.fn(),
+    isAuthenticated: jest.fn(),
+    clearAll: jest.fn(),
   },
 }));
 
@@ -25,46 +36,82 @@ describe('AuthService', () => {
 
   describe('signIn', () => {
     it('should return success when sign in is successful', async () => {
-      const mockUser = {
-        username: 'testuser',
-        attributes: { email: 'test@example.com' },
+      const mockResponse = {
+        ok: true,
       };
-      Auth.signIn.mockResolvedValue(mockUser);
+      const mockData = {
+        access_token: 'mock-access-token',
+        refresh_token: 'mock-refresh-token',
+        user: { username: 'testuser', email: 'test@example.com' },
+      };
+
+      apiClient.post.mockResolvedValue(mockResponse);
+      apiClient.handleResponse.mockResolvedValue(mockData);
 
       const result = await authService.signIn('testuser', 'password123');
 
-      expect(Auth.signIn).toHaveBeenCalledWith('testuser', 'password123');
+      expect(apiClient.post).toHaveBeenCalledWith('/auth/signin', {
+        username: 'testuser',
+        password: 'password123',
+      });
+      expect(tokenStorage.setToken).toHaveBeenCalledWith('mock-access-token');
+      expect(tokenStorage.setRefreshToken).toHaveBeenCalledWith(
+        'mock-refresh-token',
+      );
+      expect(tokenStorage.setUser).toHaveBeenCalledWith(mockData.user);
       expect(result).toEqual({
         success: true,
-        user: mockUser,
+        user: mockData.user,
         message: 'Sign in successful',
       });
     });
 
     it('should return error when sign in fails', async () => {
-      const mockError = {
-        code: 'NotAuthorizedException',
-        message: 'Incorrect username or password.',
+      const mockResponse = {
+        ok: false,
       };
-      Auth.signIn.mockRejectedValue(mockError);
+      const errorMessage = 'Invalid credentials';
+
+      apiClient.post.mockResolvedValue(mockResponse);
+      apiClient.handleError.mockResolvedValue(errorMessage);
 
       const result = await authService.signIn('testuser', 'wrongpassword');
 
       expect(result).toEqual({
         success: false,
-        error: 'NotAuthorizedException',
-        message: 'Incorrect username or password.',
+        message: errorMessage,
+      });
+      expect(tokenStorage.setToken).not.toHaveBeenCalled();
+    });
+
+    it('should handle network errors', async () => {
+      const networkError = new Error('Network error');
+      apiClient.post.mockRejectedValue(networkError);
+
+      const result = await authService.signIn('testuser', 'password123');
+
+      expect(result).toEqual({
+        success: false,
+        message: 'Network error',
       });
     });
   });
 
   describe('signUp', () => {
     it('should return success when sign up is successful', async () => {
-      const mockResult = {
-        user: { username: 'testuser' },
-        userSub: 'user-sub-id',
+      const mockResponse = {
+        ok: true,
       };
-      Auth.signUp.mockResolvedValue(mockResult);
+      const mockData = {
+        access_token: 'mock-access-token',
+        refresh_token: 'mock-refresh-token',
+        user: { username: 'testuser', email: 'test@example.com' },
+        user_id: 'user-123',
+        message: 'Sign up successful',
+      };
+
+      apiClient.post.mockResolvedValue(mockResponse);
+      apiClient.handleResponse.mockResolvedValue(mockData);
 
       const result = await authService.signUp(
         'testuser',
@@ -72,28 +119,27 @@ describe('AuthService', () => {
         'test@example.com',
       );
 
-      expect(Auth.signUp).toHaveBeenCalledWith({
+      expect(apiClient.post).toHaveBeenCalledWith('/auth/signup', {
         username: 'testuser',
         password: 'password123',
-        attributes: {
-          email: 'test@example.com',
-        },
+        email: 'test@example.com',
       });
       expect(result).toEqual({
         success: true,
-        user: mockResult.user,
-        userSub: mockResult.userSub,
-        message:
-          'Sign up successful. Please check your email for verification.',
+        user: mockData.user,
+        userSub: mockData.user_id,
+        message: mockData.message,
       });
     });
 
     it('should return error when sign up fails', async () => {
-      const mockError = {
-        code: 'UsernameExistsException',
-        message: 'An account with the given email already exists.',
+      const mockResponse = {
+        ok: false,
       };
-      Auth.signUp.mockRejectedValue(mockError);
+      const errorMessage = 'Username already exists';
+
+      apiClient.post.mockResolvedValue(mockResponse);
+      apiClient.handleError.mockResolvedValue(errorMessage);
 
       const result = await authService.signUp(
         'testuser',
@@ -103,49 +149,45 @@ describe('AuthService', () => {
 
       expect(result).toEqual({
         success: false,
-        error: 'UsernameExistsException',
-        message: 'An account with the given email already exists.',
-      });
-    });
-  });
-
-  describe('confirmSignUp', () => {
-    it('should return success when confirmation is successful', async () => {
-      Auth.confirmSignUp.mockResolvedValue();
-
-      const result = await authService.confirmSignUp('testuser', '123456');
-
-      expect(Auth.confirmSignUp).toHaveBeenCalledWith('testuser', '123456');
-      expect(result).toEqual({
-        success: true,
-        message: 'Account verified successfully',
-      });
-    });
-
-    it('should return error when confirmation fails', async () => {
-      const mockError = {
-        code: 'CodeMismatchException',
-        message: 'Invalid verification code provided, please try again.',
-      };
-      Auth.confirmSignUp.mockRejectedValue(mockError);
-
-      const result = await authService.confirmSignUp('testuser', '000000');
-
-      expect(result).toEqual({
-        success: false,
-        error: 'CodeMismatchException',
-        message: 'Invalid verification code provided, please try again.',
+        message: errorMessage,
       });
     });
   });
 
   describe('signOut', () => {
     it('should return success when sign out is successful', async () => {
-      Auth.signOut.mockResolvedValue();
+      const mockToken = 'mock-token';
+      const mockResponse = {
+        ok: true,
+      };
+
+      tokenStorage.getToken.mockReturnValue(mockToken);
+      apiClient.post.mockResolvedValue(mockResponse);
 
       const result = await authService.signOut();
 
-      expect(Auth.signOut).toHaveBeenCalled();
+      expect(apiClient.post).toHaveBeenCalledWith('/auth/signout', {
+        access_token: mockToken,
+      });
+      expect(tokenStorage.clearAll).toHaveBeenCalled();
+      expect(result).toEqual({
+        success: true,
+        message: 'Sign out successful',
+      });
+    });
+
+    it('should clear local storage even if API call fails', async () => {
+      const mockToken = 'mock-token';
+      const mockResponse = {
+        ok: false,
+      };
+
+      tokenStorage.getToken.mockReturnValue(mockToken);
+      apiClient.post.mockResolvedValue(mockResponse);
+
+      const result = await authService.signOut();
+
+      expect(tokenStorage.clearAll).toHaveBeenCalled();
       expect(result).toEqual({
         success: true,
         message: 'Sign out successful',
@@ -153,49 +195,15 @@ describe('AuthService', () => {
     });
   });
 
-  describe('forgotPassword', () => {
-    it('should return success when forgot password is successful', async () => {
-      Auth.forgotPassword.mockResolvedValue();
-
-      const result = await authService.forgotPassword('testuser');
-
-      expect(Auth.forgotPassword).toHaveBeenCalledWith('testuser');
-      expect(result).toEqual({
-        success: true,
-        message: 'Password reset code sent to your email',
-      });
-    });
-  });
-
-  describe('forgotPasswordSubmit', () => {
-    it('should return success when password reset is successful', async () => {
-      Auth.forgotPasswordSubmit.mockResolvedValue();
-
-      const result = await authService.forgotPasswordSubmit(
-        'testuser',
-        '123456',
-        'newpassword123',
-      );
-
-      expect(Auth.forgotPasswordSubmit).toHaveBeenCalledWith(
-        'testuser',
-        '123456',
-        'newpassword123',
-      );
-      expect(result).toEqual({
-        success: true,
-        message: 'Password reset successful',
-      });
-    });
-  });
-
   describe('getCurrentUser', () => {
-    it('should return user when authenticated', async () => {
+    it('should return user data from storage when authenticated', async () => {
       const mockUser = {
         username: 'testuser',
-        attributes: { email: 'test@example.com' },
+        email: 'test@example.com',
       };
-      Auth.currentAuthenticatedUser.mockResolvedValue(mockUser);
+
+      tokenStorage.isAuthenticated.mockReturnValue(true);
+      tokenStorage.getUser.mockReturnValue(mockUser);
 
       const result = await authService.getCurrentUser();
 
@@ -206,12 +214,32 @@ describe('AuthService', () => {
       });
     });
 
-    it('should return not authenticated when user is not signed in', async () => {
-      const mockError = {
-        code: 'UserUnAuthenticated',
-        message: 'The user is not authenticated',
+    it('should fetch user from API if not in storage', async () => {
+      const mockResponse = {
+        ok: true,
       };
-      Auth.currentAuthenticatedUser.mockRejectedValue(mockError);
+      const mockData = {
+        user: { username: 'testuser', email: 'test@example.com' },
+      };
+
+      tokenStorage.isAuthenticated.mockReturnValue(true);
+      tokenStorage.getUser.mockReturnValue(null);
+      apiClient.get.mockResolvedValue(mockResponse);
+      apiClient.handleResponse.mockResolvedValue(mockData);
+
+      const result = await authService.getCurrentUser();
+
+      expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
+      expect(tokenStorage.setUser).toHaveBeenCalledWith(mockData.user);
+      expect(result).toEqual({
+        success: true,
+        user: mockData.user,
+        isAuthenticated: true,
+      });
+    });
+
+    it('should return not authenticated when no valid token', async () => {
+      tokenStorage.isAuthenticated.mockReturnValue(false);
 
       const result = await authService.getCurrentUser();
 
@@ -219,22 +247,33 @@ describe('AuthService', () => {
         success: false,
         user: null,
         isAuthenticated: false,
-        error: 'UserUnAuthenticated',
-        message: 'The user is not authenticated',
+        message: 'User not authenticated',
       });
     });
   });
 
-  describe('resendConfirmationCode', () => {
-    it('should return success when resend is successful', async () => {
-      Auth.resendSignUp.mockResolvedValue();
+  describe('refreshToken', () => {
+    it('should return success when token refresh is successful', async () => {
+      const newToken = 'new-access-token';
+      apiClient.refreshAccessToken.mockResolvedValue(newToken);
 
-      const result = await authService.resendConfirmationCode('testuser');
+      const result = await authService.refreshToken();
 
-      expect(Auth.resendSignUp).toHaveBeenCalledWith('testuser');
       expect(result).toEqual({
         success: true,
-        message: 'Confirmation code resent',
+        access_token: newToken,
+      });
+    });
+
+    it('should return error when token refresh fails', async () => {
+      const error = new Error('Token refresh failed');
+      apiClient.refreshAccessToken.mockRejectedValue(error);
+
+      const result = await authService.refreshToken();
+
+      expect(result).toEqual({
+        success: false,
+        message: 'Token refresh failed',
       });
     });
   });

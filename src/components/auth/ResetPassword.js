@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -16,13 +16,16 @@ import {
 } from '@chakra-ui/react';
 import { useAuth } from '../../contexts/AuthContext';
 
-export const Login = () => {
+export const ResetPassword = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { resetPassword, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
+    username: searchParams.get('username') || '',
+    code: searchParams.get('code') || '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -38,8 +41,20 @@ export const Login = () => {
       errors.username = 'Username is required';
     }
 
-    if (!formData.password.trim()) {
-      errors.password = 'Password is required';
+    if (!formData.code.trim()) {
+      errors.code = 'Verification code is required';
+    }
+
+    if (!formData.newPassword.trim()) {
+      errors.newPassword = 'New password is required';
+    } else if (formData.newPassword.length < 8) {
+      errors.newPassword = 'Password must be at least 8 characters';
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
     }
 
     setFormErrors(errors);
@@ -77,13 +92,22 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await login(formData.username, formData.password);
+      const result = await resetPassword(
+        formData.username,
+        formData.code,
+        formData.newPassword,
+      );
 
       if (result.success) {
-        navigate('/admin');
+        navigate('/auth/signin', {
+          state: {
+            message:
+              'Password reset successful. Please sign in with your new password.',
+          },
+        });
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Reset password error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,8 +129,12 @@ export const Login = () => {
     >
       <VStack spacing={6}>
         <Heading size="lg" textAlign="center">
-          Sign In
+          Reset Password
         </Heading>
+
+        <Text fontSize="sm" textAlign="center" color="gray.600">
+          Enter the verification code from your email and your new password.
+        </Text>
 
         {error && (
           <Alert status="error" borderRadius="md">
@@ -131,18 +159,46 @@ export const Login = () => {
               <FormErrorMessage>{formErrors.username}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!formErrors.password}>
-              <FormLabel htmlFor="password">Password</FormLabel>
+            <FormControl isInvalid={!!formErrors.code}>
+              <FormLabel htmlFor="code">Verification Code</FormLabel>
               <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
+                id="code"
+                name="code"
+                type="text"
+                value={formData.code}
                 onChange={handleInputChange}
-                placeholder="Enter your password"
-                autoComplete="current-password"
+                placeholder="Enter verification code"
+                autoComplete="off"
               />
-              <FormErrorMessage>{formErrors.password}</FormErrorMessage>
+              <FormErrorMessage>{formErrors.code}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl isInvalid={!!formErrors.newPassword}>
+              <FormLabel htmlFor="newPassword">New Password</FormLabel>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                placeholder="Enter your new password"
+                autoComplete="new-password"
+              />
+              <FormErrorMessage>{formErrors.newPassword}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl isInvalid={!!formErrors.confirmPassword}>
+              <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm your new password"
+                autoComplete="new-password"
+              />
+              <FormErrorMessage>{formErrors.confirmPassword}</FormErrorMessage>
             </FormControl>
 
             <Button
@@ -150,34 +206,24 @@ export const Login = () => {
               colorScheme="blue"
               width="100%"
               isLoading={loading}
-              loadingText="Signing in..."
+              loadingText="Resetting password..."
               isDisabled={loading}
             >
-              Sign In
+              Reset Password
             </Button>
           </VStack>
         </Box>
 
         <VStack spacing={2} textAlign="center">
           <Text fontSize="sm">
-            Don&apos;t have an account?{' '}
+            Remember your password?{' '}
             <Link
-              to="/auth/signup"
+              to="/auth/signin"
               style={{ color: 'blue', textDecoration: 'underline' }}
             >
-              Sign Up
+              Sign In
             </Link>
           </Text>
-          <Link
-            to="/auth/forgot-password"
-            style={{
-              color: 'blue',
-              textDecoration: 'underline',
-              fontSize: '14px',
-            }}
-          >
-            Forgot Password?
-          </Link>
         </VStack>
       </VStack>
     </Box>

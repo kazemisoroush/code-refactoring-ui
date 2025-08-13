@@ -1,20 +1,45 @@
-import { Auth } from 'aws-amplify';
+import { apiClient } from '../utils/apiClient';
+import { tokenStorage } from '../utils/tokenStorage';
 
 export class AuthService {
   // Sign in user
   async signIn(username, password) {
     try {
-      const user = await Auth.signIn(username, password);
+      const response = await apiClient.post('/auth/signin', {
+        username,
+        password,
+      });
+
+      if (!response.ok) {
+        const errorMessage = await apiClient.handleError(response);
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+
+      const data = await apiClient.handleResponse(response);
+
+      // Store tokens and user data
+      if (data.access_token) {
+        tokenStorage.setToken(data.access_token);
+      }
+      if (data.refresh_token) {
+        tokenStorage.setRefreshToken(data.refresh_token);
+      }
+      if (data.user) {
+        tokenStorage.setUser(data.user);
+      }
+
       return {
         success: true,
-        user,
+        user: data.user,
         message: 'Sign in successful',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        message: error.message || 'An unexpected error occurred during login',
       };
     }
   }
@@ -22,33 +47,66 @@ export class AuthService {
   // Sign up user
   async signUp(username, password, email) {
     try {
-      const result = await Auth.signUp({
+      const response = await apiClient.post('/auth/signup', {
         username,
         password,
-        attributes: {
-          email,
-        },
+        email,
       });
+
+      if (!response.ok) {
+        const errorMessage = await apiClient.handleError(response);
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+
+      const data = await apiClient.handleResponse(response);
+
+      // Store tokens and user data if provided (some APIs might auto-login after signup)
+      if (data.access_token) {
+        tokenStorage.setToken(data.access_token);
+      }
+      if (data.refresh_token) {
+        tokenStorage.setRefreshToken(data.refresh_token);
+      }
+      if (data.user) {
+        tokenStorage.setUser(data.user);
+      }
+
       return {
         success: true,
-        user: result.user,
-        userSub: result.userSub,
+        user: data.user,
+        userSub: data.user_id,
         message:
+          data.message ||
           'Sign up successful. Please check your email for verification.',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        message: error.message || 'An unexpected error occurred during signup',
       };
     }
   }
 
-  // Confirm sign up with verification code
+  // Confirm sign up with verification code (if needed by the API)
   async confirmSignUp(username, code) {
     try {
-      await Auth.confirmSignUp(username, code);
+      // This endpoint might not exist in the current API, but keeping for compatibility
+      const response = await apiClient.post('/auth/confirm', {
+        username,
+        code,
+      });
+
+      if (!response.ok) {
+        const errorMessage = await apiClient.handleError(response);
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+
       return {
         success: true,
         message: 'Account verified successfully',
@@ -56,8 +114,8 @@ export class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        message:
+          error.message || 'An unexpected error occurred during confirmation',
       };
     }
   }
@@ -65,16 +123,33 @@ export class AuthService {
   // Sign out user
   async signOut() {
     try {
-      await Auth.signOut();
+      const token = tokenStorage.getToken();
+
+      if (token) {
+        // Call the API signout endpoint
+        const response = await apiClient.post('/auth/signout', {
+          access_token: token,
+        });
+
+        // Even if the API call fails, we should clear local tokens
+        if (!response.ok) {
+          console.warn('Server signout failed, but clearing local tokens');
+        }
+      }
+
+      // Clear all local authentication data
+      tokenStorage.clearAll();
+
       return {
         success: true,
         message: 'Sign out successful',
       };
     } catch (error) {
+      // Even if signout fails on server, clear local state
+      tokenStorage.clearAll();
       return {
-        success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        success: true,
+        message: 'Sign out successful',
       };
     }
   }
@@ -82,16 +157,29 @@ export class AuthService {
   // Forgot password
   async forgotPassword(username) {
     try {
-      await Auth.forgotPassword(username);
+      // This endpoint might not exist in the current API, but keeping for compatibility
+      const response = await apiClient.post('/auth/forgot-password', {
+        username,
+      });
+
+      if (!response.ok) {
+        const errorMessage = await apiClient.handleError(response);
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+
+      const data = await apiClient.handleResponse(response);
+
       return {
         success: true,
-        message: 'Password reset code sent to your email',
+        message: data.message || 'Password reset code sent to your email',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        message: error.message || 'An unexpected error occurred',
       };
     }
   }
@@ -99,7 +187,21 @@ export class AuthService {
   // Confirm forgot password
   async forgotPasswordSubmit(username, code, newPassword) {
     try {
-      await Auth.forgotPasswordSubmit(username, code, newPassword);
+      // This endpoint might not exist in the current API, but keeping for compatibility
+      const response = await apiClient.post('/auth/reset-password', {
+        username,
+        code,
+        new_password: newPassword,
+      });
+
+      if (!response.ok) {
+        const errorMessage = await apiClient.handleError(response);
+        return {
+          success: false,
+          message: errorMessage,
+        };
+      }
+
       return {
         success: true,
         message: 'Password reset successful',
@@ -107,8 +209,8 @@ export class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        message:
+          error.message || 'An unexpected error occurred during password reset',
       };
     }
   }
@@ -116,36 +218,75 @@ export class AuthService {
   // Get current user
   async getCurrentUser() {
     try {
-      const user = await Auth.currentAuthenticatedUser();
+      // Check if we have a valid token
+      if (!tokenStorage.isAuthenticated()) {
+        return {
+          success: false,
+          user: null,
+          isAuthenticated: false,
+          message: 'User not authenticated',
+        };
+      }
+
+      // Get user data from storage
+      const user = tokenStorage.getUser();
+
+      if (user) {
+        return {
+          success: true,
+          user,
+          isAuthenticated: true,
+        };
+      }
+
+      // If no user data in storage, try to fetch from API
+      const response = await apiClient.get('/auth/me');
+
+      if (!response.ok) {
+        // Token might be invalid
+        tokenStorage.clearAll();
+        return {
+          success: false,
+          user: null,
+          isAuthenticated: false,
+          message: 'User not authenticated',
+        };
+      }
+
+      const userData = await apiClient.handleResponse(response);
+
+      // Store the user data
+      tokenStorage.setUser(userData.user);
+
       return {
         success: true,
-        user,
+        user: userData.user,
         isAuthenticated: true,
       };
     } catch (error) {
+      // Clear tokens if there's an error
+      tokenStorage.clearAll();
       return {
         success: false,
         user: null,
         isAuthenticated: false,
-        error: error.code || 'UNKNOWN_ERROR',
         message: error.message || 'User not authenticated',
       };
     }
   }
 
-  // Resend confirmation code
-  async resendConfirmationCode(username) {
+  // Refresh access token
+  async refreshToken() {
     try {
-      await Auth.resendSignUp(username);
+      const newToken = await apiClient.refreshAccessToken();
       return {
         success: true,
-        message: 'Confirmation code resent',
+        access_token: newToken,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.code || 'UNKNOWN_ERROR',
-        message: error.message || 'An unknown error occurred',
+        message: error.message || 'Token refresh failed',
       };
     }
   }

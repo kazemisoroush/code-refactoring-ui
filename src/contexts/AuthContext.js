@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { useTokenRefresh } from '../hooks/useTokenRefresh';
 
 // Authentication state
 const initialState = {
@@ -73,11 +74,12 @@ const AuthContext = createContext();
 // Auth provider component
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const { startTokenRefreshCheck, stopTokenRefreshCheck } = useTokenRefresh();
 
   // Check if user is authenticated on app load
   useEffect(() => {
     checkAuthState();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkAuthState = async () => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
@@ -86,11 +88,15 @@ export const AuthProvider = ({ children }) => {
       const result = await authService.getCurrentUser();
       if (result.success && result.isAuthenticated) {
         dispatch({ type: authActions.LOGIN_SUCCESS, payload: result.user });
+        // Start token refresh checking for authenticated users
+        startTokenRefreshCheck();
       } else {
         dispatch({ type: authActions.LOGOUT });
+        stopTokenRefreshCheck();
       }
     } catch (error) {
       dispatch({ type: authActions.LOGOUT });
+      stopTokenRefreshCheck();
     }
   };
 
@@ -102,6 +108,8 @@ export const AuthProvider = ({ children }) => {
       const result = await authService.signIn(username, password);
       if (result.success) {
         dispatch({ type: authActions.LOGIN_SUCCESS, payload: result.user });
+        // Start token refresh checking after successful login
+        startTokenRefreshCheck();
         return result;
       } else {
         dispatch({ type: authActions.LOGIN_FAILURE, payload: result.message });
@@ -120,10 +128,13 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.signOut();
       dispatch({ type: authActions.LOGOUT });
+      // Stop token refresh checking after logout
+      stopTokenRefreshCheck();
       return { success: true };
     } catch (error) {
       // Even if logout fails on server, clear local state
       dispatch({ type: authActions.LOGOUT });
+      stopTokenRefreshCheck();
       return { success: true };
     }
   };
