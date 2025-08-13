@@ -4,6 +4,9 @@
 
 - This file should always updated manually by human.
 - Always take TDD (Test-Driven Development) approach when writing code.
+- Always code in a way that is dependency injection friendly. This means that you should design your code in such a way that it can be easily tested with mock dependencies.
+- All unit tests should live in the same directory as the code they are testing with a `*.test.*` suffix.
+- All tests should be broken down into 3 parts: Arrange, Act, Assert. This helps in maintaining clarity and structure in tests.
 - Always follow SOLID principles and design patterns.
 - Never create a test case that is not adding any value.
 - Never write Markdown documentation unless you are specifically asked to do so. This is not about code comments, but rather about documentation files.
@@ -15,6 +18,14 @@
 - Never let a command run for more than 60 seconds without checking if it is still running. If it is not running, stop it and investigate the issue.
 - Try avoid changing the code that is not related to the task at hand.
 - Always follow "The Rule of Silence" in Unix that states that when a program has nothing surprising, interesting or useful to say, it should say nothing.
+- Never determine the application flow with exceptions.
+
+# Project Specific Guidelines
+
+- Avoid writing complex UI related tests. Just write tests for functions and components that are not directly UI related.
+- At the same time try encapsulate logic in such a way that it can be tested without relying on the UI as much as possible.
+- This logic extraction should ideally happen behind interfaces.
+- This project is JavaScript based not TypeScript, so avoid using TypeScript specific features.
 
 # Pre-commit Guidelines
 

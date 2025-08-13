@@ -31,13 +31,13 @@ class ApiClient {
 
   /**
    * Refresh the access token
-   * @returns {Promise<string>} New access token
+   * @returns {Promise<{success: boolean, token?: string, error?: string}>} Result object
    */
   async refreshAccessToken() {
     const refreshToken = tokenStorage.getRefreshToken();
 
     if (!refreshToken) {
-      throw new Error('No refresh token available');
+      return { success: false, error: 'No refresh token available' };
     }
 
     try {
@@ -50,22 +50,24 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error('Token refresh failed');
+        tokenStorage.clearAll();
+        return { success: false, error: 'Token refresh failed' };
       }
 
       const data = await response.json();
       const newToken = data.access_token;
 
       if (!newToken) {
-        throw new Error('No access token in refresh response');
+        tokenStorage.clearAll();
+        return { success: false, error: 'No access token in refresh response' };
       }
 
       tokenStorage.setToken(newToken);
-      return newToken;
+      return { success: true, token: newToken };
     } catch (error) {
       // Clear tokens if refresh fails
       tokenStorage.clearAll();
-      throw error;
+      return { success: false, error: error.message || 'Token refresh failed' };
     }
   }
 
@@ -121,8 +123,9 @@ class ApiClient {
 
       this.isRefreshing = true;
 
-      try {
-        await this.refreshAccessToken();
+      const refreshResult = await this.refreshAccessToken();
+
+      if (refreshResult.success) {
         this.processQueue(null);
 
         // Retry the original request with new token
@@ -132,14 +135,14 @@ class ApiClient {
           headers: newHeaders,
         });
 
-        return retryResponse;
-      } catch (refreshError) {
-        this.processQueue(refreshError);
-        // Clear authentication and redirect to login
-        tokenStorage.clearAll();
-        throw refreshError;
-      } finally {
         this.isRefreshing = false;
+        return retryResponse;
+      } else {
+        this.processQueue(new Error(refreshResult.error));
+        // Clear authentication - already done in refreshAccessToken
+        this.isRefreshing = false;
+        // Return the original 401 response instead of throwing
+        return response;
       }
     }
 

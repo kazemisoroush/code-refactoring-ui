@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Box,
@@ -15,11 +15,18 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useAuth } from '../../contexts/AuthContext';
+import { createResetPasswordValidator } from '../../utils/resetPasswordValidator';
+import { createResetPasswordFormHandler } from '../../utils/resetPasswordFormHandler';
+import {
+  createAuthContextAdapter,
+  createReactRouterNavigationAdapter,
+} from '../../adapters/authAdapters';
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { resetPassword, isLoading, error, clearError } = useAuth();
+  const authContext = useAuth();
+  const { isLoading, error, clearError } = authContext;
 
   const [formData, setFormData] = useState({
     username: searchParams.get('username') || '',
@@ -34,32 +41,25 @@ export const ResetPassword = () => {
   const bgColor = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
 
-  const validateForm = () => {
-    const errors = {};
-
-    if (!formData.username.trim()) {
-      errors.username = 'Username is required';
-    }
-
-    if (!formData.code.trim()) {
-      errors.code = 'Verification code is required';
-    }
-
-    if (!formData.newPassword.trim()) {
-      errors.newPassword = 'New password is required';
-    } else if (formData.newPassword.length < 8) {
-      errors.newPassword = 'Password must be at least 8 characters';
-    }
-
-    if (!formData.confirmPassword.trim()) {
-      errors.confirmPassword = 'Please confirm your password';
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+  // Create instances of our business logic with dependency injection
+  const validator = useMemo(() => createResetPasswordValidator(), []);
+  const authService = useMemo(
+    () => createAuthContextAdapter(authContext),
+    [authContext],
+  );
+  const navigationService = useMemo(
+    () => createReactRouterNavigationAdapter(navigate),
+    [navigate],
+  );
+  const formHandler = useMemo(
+    () =>
+      createResetPasswordFormHandler({
+        validator,
+        authService,
+        navigationService,
+      }),
+    [validator, authService, navigationService],
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -84,30 +84,16 @@ export const ResetPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const result = await resetPassword(
-        formData.username,
-        formData.code,
-        formData.newPassword,
-      );
+      const result = await formHandler.submitForm(formData);
 
-      if (result.success) {
-        navigate('/auth/signin', {
-          state: {
-            message:
-              'Password reset successful. Please sign in with your new password.',
-          },
-        });
+      if (result.validationErrors) {
+        setFormErrors(result.validationErrors);
       }
     } catch (err) {
-      console.error('Reset password error:', err);
+      console.error('Form submission error:', err);
     } finally {
       setIsSubmitting(false);
     }
