@@ -18,7 +18,7 @@ install: ## Install project dependencies
 # Lint the code
 lint: ## Run ESLint to check code quality
 	@echo "Running linting checks..."
-	@$(NPM) run build > /dev/null 2>&1 || (echo "Build failed - likely linting issues"; exit 1)
+	@$(NPM) run lint
 	@echo "✓ Linting passed"
 
 # Run tests
@@ -33,7 +33,9 @@ serve: ## Start the development server
 
 # Build the project
 build: ## Build the project for production
+	@echo "Building project for production..."
 	$(NPM) run build
+	@echo "✓ Build completed"
 
 # Clean node_modules and build artifacts
 clean: ## Clean node_modules and build directories
@@ -46,8 +48,19 @@ fresh: clean install ## Clean install - remove node_modules and reinstall
 ci: ## Run linting and tests (CI pipeline)
 	@echo "Running CI pipeline..."
 	@if [ ! -d "node_modules" ]; then echo "Installing dependencies..."; $(MAKE) install; fi
+	@$(MAKE) install
 	@$(MAKE) test
 	@$(MAKE) lint
+	@$(MAKE) build
 	@echo "✓ CI pipeline completed successfully"
 
-.PHONY: help install lint test serve build clean fresh ci
+# CI pipeline without build (for memory-constrained environments)
+ci-light: ## Run linting and tests without build (for dev environments)
+	@echo "Running lightweight CI pipeline..."
+	@if [ ! -d "node_modules" ]; then echo "Installing dependencies..."; $(MAKE) install; fi
+	@$(MAKE) install
+	@$(MAKE) test
+	@$(MAKE) lint
+	@echo "✓ Lightweight CI pipeline completed successfully"
+
+.PHONY: help install lint test serve build clean fresh ci ci-light

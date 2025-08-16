@@ -16,13 +16,14 @@ import {
 } from '@chakra-ui/react';
 import { useAuth } from '../../contexts/AuthContext';
 
-export const Login = () => {
+export const Signup = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuth();
+  const { signup, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -36,10 +37,20 @@ export const Login = () => {
 
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Email address is invalid';
     }
 
     if (!formData.password.trim()) {
       errors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
     }
 
     setFormErrors(errors);
@@ -77,13 +88,19 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await signup(formData.email, formData.password);
 
       if (result.success) {
-        navigate('/admin');
+        // If signup includes automatic login, navigate to admin
+        if (result.user) {
+          navigate('/admin');
+        } else {
+          // Otherwise, show success message or navigate to login
+          navigate('/auth/signin');
+        }
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Signup error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,7 +122,7 @@ export const Login = () => {
     >
       <VStack spacing={6}>
         <Heading size="lg" textAlign="center">
-          Sign In
+          Sign Up
         </Heading>
 
         {error && (
@@ -140,9 +157,23 @@ export const Login = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter your password"
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
               <FormErrorMessage>{formErrors.password}</FormErrorMessage>
+            </FormControl>
+
+            <FormControl isInvalid={!!formErrors.confirmPassword}>
+              <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm your password"
+                autoComplete="new-password"
+              />
+              <FormErrorMessage>{formErrors.confirmPassword}</FormErrorMessage>
             </FormControl>
 
             <Button
@@ -150,34 +181,24 @@ export const Login = () => {
               colorScheme="blue"
               width="100%"
               isLoading={loading}
-              loadingText="Signing in..."
+              loadingText="Creating account..."
               isDisabled={loading}
             >
-              Sign In
+              Sign Up
             </Button>
           </VStack>
         </Box>
 
         <VStack spacing={2} textAlign="center">
           <Text fontSize="sm">
-            Don&apos;t have an account?{' '}
+            Already have an account?{' '}
             <Link
-              to="/auth/signup"
+              to="/auth/signin"
               style={{ color: 'blue', textDecoration: 'underline' }}
             >
-              Sign Up
+              Sign In
             </Link>
           </Text>
-          <Link
-            to="/auth/forgot-password"
-            style={{
-              color: 'blue',
-              textDecoration: 'underline',
-              fontSize: '14px',
-            }}
-          >
-            Forgot Password?
-          </Link>
         </VStack>
       </VStack>
     </Box>

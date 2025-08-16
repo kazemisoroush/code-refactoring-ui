@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -16,17 +16,16 @@ import {
 } from '@chakra-ui/react';
 import { useAuth } from '../../contexts/AuthContext';
 
-export const Login = () => {
-  const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuth();
+export const ForgotPassword = () => {
+  const { forgotPassword, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const bgColor = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -36,10 +35,6 @@ export const Login = () => {
 
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
-    }
-
-    if (!formData.password.trim()) {
-      errors.password = 'Password is required';
     }
 
     setFormErrors(errors);
@@ -77,19 +72,59 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await forgotPassword(formData.email);
 
       if (result.success) {
-        navigate('/admin');
+        setIsSubmitted(true);
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Forgot password error:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const loading = isLoading || isSubmitting;
+
+  if (isSubmitted) {
+    return (
+      <Box
+        maxWidth="400px"
+        margin="auto"
+        mt={8}
+        p={6}
+        bg={bgColor}
+        borderRadius="lg"
+        border="1px"
+        borderColor={borderColor}
+        boxShadow="lg"
+      >
+        <VStack spacing={6}>
+          <Heading size="lg" textAlign="center">
+            Check Your Email
+          </Heading>
+
+          <Alert status="success" borderRadius="md">
+            <AlertIcon />
+            If an account with that email exists, we&apos;ve sent you password
+            reset instructions.
+          </Alert>
+
+          <VStack spacing={2} textAlign="center">
+            <Text fontSize="sm">
+              Remember your password?{' '}
+              <Link
+                to="/auth/signin"
+                style={{ color: 'blue', textDecoration: 'underline' }}
+              >
+                Sign In
+              </Link>
+            </Text>
+          </VStack>
+        </VStack>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -105,8 +140,13 @@ export const Login = () => {
     >
       <VStack spacing={6}>
         <Heading size="lg" textAlign="center">
-          Sign In
+          Forgot Password
         </Heading>
+
+        <Text fontSize="sm" textAlign="center" color="gray.600">
+          Enter your email address and we&apos;ll send you instructions to reset
+          your password.
+        </Text>
 
         {error && (
           <Alert status="error" borderRadius="md">
@@ -131,34 +171,29 @@ export const Login = () => {
               <FormErrorMessage>{formErrors.email}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!formErrors.password}>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Enter your password"
-                autoComplete="current-password"
-              />
-              <FormErrorMessage>{formErrors.password}</FormErrorMessage>
-            </FormControl>
-
             <Button
               type="submit"
               colorScheme="blue"
               width="100%"
               isLoading={loading}
-              loadingText="Signing in..."
+              loadingText="Sending..."
               isDisabled={loading}
             >
-              Sign In
+              Send Reset Instructions
             </Button>
           </VStack>
         </Box>
 
         <VStack spacing={2} textAlign="center">
+          <Text fontSize="sm">
+            Remember your password?{' '}
+            <Link
+              to="/auth/signin"
+              style={{ color: 'blue', textDecoration: 'underline' }}
+            >
+              Sign In
+            </Link>
+          </Text>
           <Text fontSize="sm">
             Don&apos;t have an account?{' '}
             <Link
@@ -168,16 +203,6 @@ export const Login = () => {
               Sign Up
             </Link>
           </Text>
-          <Link
-            to="/auth/forgot-password"
-            style={{
-              color: 'blue',
-              textDecoration: 'underline',
-              fontSize: '14px',
-            }}
-          >
-            Forgot Password?
-          </Link>
         </VStack>
       </VStack>
     </Box>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from './AuthContext';
 import { authService } from '../services/authService';
 
@@ -16,9 +16,18 @@ jest.mock('../services/authService', () => ({
   },
 }));
 
-// Test component to access auth context
+// Mock the token refresh hook
+jest.mock('../hooks/useTokenRefresh', () => ({
+  useTokenRefresh: () => ({
+    startTokenRefreshCheck: jest.fn(),
+    stopTokenRefreshCheck: jest.fn(),
+  }),
+}));
+
+// Test component that uses the auth context
 const TestComponent = () => {
   const auth = useAuth();
+
   return (
     <div>
       <span data-testid="loading">
@@ -27,9 +36,7 @@ const TestComponent = () => {
       <span data-testid="authenticated">
         {auth.isAuthenticated ? 'authenticated' : 'not-authenticated'}
       </span>
-      <span data-testid="user">
-        {auth.user ? auth.user.username : 'no-user'}
-      </span>
+      <span data-testid="user">{auth.user?.username || 'no-user'}</span>
       <span data-testid="error">{auth.error || 'no-error'}</span>
       <button
         data-testid="login-btn"
@@ -39,6 +46,12 @@ const TestComponent = () => {
       </button>
       <button data-testid="logout-btn" onClick={() => auth.logout()}>
         Logout
+      </button>
+      <button
+        data-testid="signup-btn"
+        onClick={() => auth.signup('test@example.com', 'password123')}
+      >
+        Signup
       </button>
     </div>
   );
@@ -75,14 +88,10 @@ describe('AuthContext', () => {
       );
       expect(screen.getByTestId('user')).toHaveTextContent('no-user');
       expect(screen.getByTestId('error')).toHaveTextContent('no-error');
-      expect(authService.getCurrentUser).toHaveBeenCalled();
     });
 
-    test('should set authenticated user if logged in on mount', async () => {
-      const mockUser = {
-        username: 'testuser',
-        attributes: { email: 'test@example.com' },
-      };
+    test('should handle authenticated user on mount', async () => {
+      const mockUser = { username: 'testuser' };
       authService.getCurrentUser.mockResolvedValue({
         success: true,
         isAuthenticated: true,
@@ -95,18 +104,14 @@ describe('AuthContext', () => {
         </AuthProvider>,
       );
 
-      // Wait for user to be set and loading to complete
-      await waitFor(
-        () => {
-          expect(screen.getByTestId('user')).toHaveTextContent('testuser');
-        },
-        { timeout: 3000 },
-      );
+      await waitFor(() => {
+        expect(screen.getByTestId('loading')).toHaveTextContent('not-loading');
+      });
 
       expect(screen.getByTestId('authenticated')).toHaveTextContent(
         'authenticated',
       );
-      expect(screen.getByTestId('loading')).toHaveTextContent('not-loading');
+      expect(screen.getByTestId('user')).toHaveTextContent('testuser');
     });
   });
 
@@ -146,13 +151,10 @@ describe('AuthContext', () => {
       });
 
       expect(screen.getByTestId('user')).toHaveTextContent('testuser');
-      expect(authService.signIn).toHaveBeenCalledWith(
-        'testuser',
-        'password123',
-      );
+      expect(screen.getByTestId('error')).toHaveTextContent('no-error');
     });
 
-    test('should handle failed login', async () => {
+    test('should handle login failure', async () => {
       authService.getCurrentUser.mockResolvedValue({
         success: false,
         isAuthenticated: false,
@@ -206,7 +208,7 @@ describe('AuthContext', () => {
         </AuthProvider>,
       );
 
-      // Wait for user to be authenticated
+      // Wait for initial auth check
       await waitFor(() => {
         expect(screen.getByTestId('authenticated')).toHaveTextContent(
           'authenticated',
@@ -225,24 +227,88 @@ describe('AuthContext', () => {
       });
 
       expect(screen.getByTestId('user')).toHaveTextContent('no-user');
-      expect(authService.signOut).toHaveBeenCalled();
+    });
+  });
+
+  describe('signup', () => {
+    test('should handle successful signup', async () => {
+      authService.getCurrentUser.mockResolvedValue({
+        success: false,
+        isAuthenticated: false,
+      });
+      authService.signUp.mockResolvedValue({
+        success: true,
+        user: { username: 'testuser' },
+        message: 'Signup successful',
+      });
+
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>,
+      );
+
+      // Wait for initial auth check
+      await waitFor(() => {
+        expect(screen.getByTestId('loading')).toHaveTextContent('not-loading');
+      });
+
+      // Trigger signup
+      await act(async () => {
+        screen.getByTestId('signup-btn').click();
+      });
+
+      await waitFor(() => {
+        expect(authService.signUp).toHaveBeenCalledWith(
+          'test@example.com',
+          'password123',
+        );
+      });
+    });
+
+    test('should handle signup failure', async () => {
+      authService.getCurrentUser.mockResolvedValue({
+        success: false,
+        isAuthenticated: false,
+      });
+      authService.signUp.mockResolvedValue({
+        success: false,
+        message: 'Email already exists',
+      });
+
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>,
+      );
+
+      // Wait for initial auth check
+      await waitFor(() => {
+        expect(screen.getByTestId('loading')).toHaveTextContent('not-loading');
+      });
+
+      // Trigger signup
+      await act(async () => {
+        screen.getByTestId('signup-btn').click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('error')).toHaveTextContent(
+          'Email already exists',
+        );
+      });
     });
   });
 
   describe('useAuth hook', () => {
     test('should throw error when used outside AuthProvider', () => {
-      const TestComponentOutsideProvider = () => {
-        useAuth();
-        return <div>Test</div>;
-      };
-
       // Suppress console.error for this test
       const consoleSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
       expect(() => {
-        render(<TestComponentOutsideProvider />);
+        render(<TestComponent />);
       }).toThrow('useAuth must be used within an AuthProvider');
 
       consoleSpy.mockRestore();

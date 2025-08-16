@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { useTokenRefresh } from '../hooks/useTokenRefresh';
 
 // Authentication state
 const initialState = {
@@ -73,11 +74,12 @@ const AuthContext = createContext();
 // Auth provider component
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const { startTokenRefreshCheck, stopTokenRefreshCheck } = useTokenRefresh();
 
   // Check if user is authenticated on app load
   useEffect(() => {
     checkAuthState();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkAuthState = async () => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
@@ -86,22 +88,28 @@ export const AuthProvider = ({ children }) => {
       const result = await authService.getCurrentUser();
       if (result.success && result.isAuthenticated) {
         dispatch({ type: authActions.LOGIN_SUCCESS, payload: result.user });
+        // Start token refresh checking for authenticated users
+        startTokenRefreshCheck();
       } else {
         dispatch({ type: authActions.LOGOUT });
+        stopTokenRefreshCheck();
       }
     } catch (error) {
       dispatch({ type: authActions.LOGOUT });
+      stopTokenRefreshCheck();
     }
   };
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
     dispatch({ type: authActions.CLEAR_ERROR });
 
     try {
-      const result = await authService.signIn(username, password);
+      const result = await authService.signIn(email, password);
       if (result.success) {
         dispatch({ type: authActions.LOGIN_SUCCESS, payload: result.user });
+        // Start token refresh checking after successful login
+        startTokenRefreshCheck();
         return result;
       } else {
         dispatch({ type: authActions.LOGIN_FAILURE, payload: result.message });
@@ -120,20 +128,23 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.signOut();
       dispatch({ type: authActions.LOGOUT });
+      // Stop token refresh checking after logout
+      stopTokenRefreshCheck();
       return { success: true };
     } catch (error) {
       // Even if logout fails on server, clear local state
       dispatch({ type: authActions.LOGOUT });
+      stopTokenRefreshCheck();
       return { success: true };
     }
   };
 
-  const signup = async (username, password, email) => {
+  const signup = async (email, password) => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
     dispatch({ type: authActions.CLEAR_ERROR });
 
     try {
-      const result = await authService.signUp(username, password, email);
+      const result = await authService.signUp(email, password);
       dispatch({ type: authActions.SET_LOADING, payload: false });
 
       if (!result.success) {
@@ -148,12 +159,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const confirmSignUp = async (username, code) => {
+  const confirmSignUp = async (email, code) => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
     dispatch({ type: authActions.CLEAR_ERROR });
 
     try {
-      const result = await authService.confirmSignUp(username, code);
+      const result = await authService.confirmSignUp(email, code);
       dispatch({ type: authActions.SET_LOADING, payload: false });
 
       if (!result.success) {
@@ -168,12 +179,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const forgotPassword = async (username) => {
+  const forgotPassword = async (email) => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
     dispatch({ type: authActions.CLEAR_ERROR });
 
     try {
-      const result = await authService.forgotPassword(username);
+      const result = await authService.forgotPassword(email);
       dispatch({ type: authActions.SET_LOADING, payload: false });
 
       if (!result.success) {
@@ -188,13 +199,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async (username, code, newPassword) => {
+  const resetPassword = async (email, code, newPassword) => {
     dispatch({ type: authActions.SET_LOADING, payload: true });
     dispatch({ type: authActions.CLEAR_ERROR });
 
     try {
       const result = await authService.forgotPasswordSubmit(
-        username,
+        email,
         code,
         newPassword,
       );
