@@ -20,7 +20,7 @@ export const ForgotPassword = () => {
   const { forgotPassword, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -33,8 +33,8 @@ export const ForgotPassword = () => {
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.username.trim()) {
-      errors.username = 'Username or email is required';
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
     }
 
     setFormErrors(errors);
@@ -72,7 +72,7 @@ export const ForgotPassword = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await forgotPassword(formData.username);
+      const result = await forgotPassword(formData.email);
 
       if (result.success) {
         setIsSubmitted(true);
@@ -106,8 +106,8 @@ export const ForgotPassword = () => {
 
           <Alert status="success" borderRadius="md">
             <AlertIcon />
-            If an account with that username exists, we&apos;ve sent you
-            password reset instructions.
+            If an account with that email exists, we&apos;ve sent you password
+            reset instructions.
           </Alert>
 
           <VStack spacing={2} textAlign="center">
@@ -144,8 +144,8 @@ export const ForgotPassword = () => {
         </Heading>
 
         <Text fontSize="sm" textAlign="center" color="gray.600">
-          Enter your username or email address and we&apos;ll send you
-          instructions to reset your password.
+          Enter your email address and we&apos;ll send you instructions to reset
+          your password.
         </Text>
 
         {error && (
@@ -157,18 +157,18 @@ export const ForgotPassword = () => {
 
         <Box as="form" width="100%" onSubmit={handleSubmit}>
           <VStack spacing={4}>
-            <FormControl isInvalid={!!formErrors.username}>
-              <FormLabel htmlFor="username">Username or Email</FormLabel>
+            <FormControl isInvalid={!!formErrors.email}>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Enter your username or email"
-                autoComplete="username"
+                placeholder="Enter your email"
+                autoComplete="email"
               />
-              <FormErrorMessage>{formErrors.username}</FormErrorMessage>
+              <FormErrorMessage>{formErrors.email}</FormErrorMessage>
             </FormControl>
 
             <Button

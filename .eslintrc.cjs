@@ -19,6 +19,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',
     'no-useless-catch': 'error',
+    'react/jsx-no-target-blank': 'error',
   },
   settings: {
     react: {

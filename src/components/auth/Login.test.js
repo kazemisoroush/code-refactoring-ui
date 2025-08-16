@@ -44,7 +44,7 @@ describe('Login Component', () => {
     expect(
       screen.getByRole('heading', { name: /sign in/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
 
     // Wait for loading to finish and normal button to appear
@@ -61,13 +61,13 @@ describe('Login Component', () => {
     const user = userEvent.setup();
     renderWithAuthAndRouter(<Login />);
 
-    const usernameInput = screen.getByLabelText(/username/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
 
-    await user.type(usernameInput, 'testuser');
+    await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
 
-    expect(usernameInput).toHaveValue('testuser');
+    expect(emailInput).toHaveValue('test@example.com');
     expect(passwordInput).toHaveValue('password123');
   });
 
@@ -85,7 +85,7 @@ describe('Login Component', () => {
     const submitButton = screen.getByRole('button', { name: /sign in/i });
     await user.click(submitButton);
 
-    expect(screen.getByText(/username is required/i)).toBeInTheDocument();
+    expect(screen.getByText(/email is required/i)).toBeInTheDocument();
     expect(screen.getByText(/password is required/i)).toBeInTheDocument();
   });
 
@@ -93,7 +93,7 @@ describe('Login Component', () => {
     const user = userEvent.setup();
     authService.signIn.mockResolvedValue({
       success: true,
-      user: { username: 'testuser' },
+      user: { email: 'test@example.com' },
       message: 'Login successful',
     });
 
@@ -106,17 +106,17 @@ describe('Login Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
-    await user.type(usernameInput, 'testuser');
+    await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.click(submitButton);
 
     await waitFor(() => {
       expect(authService.signIn).toHaveBeenCalledWith(
-        'testuser',
+        'test@example.com',
         'password123',
       );
     });
@@ -142,11 +142,11 @@ describe('Login Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
-    await user.type(usernameInput, 'testuser');
+    await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'wrongpassword');
     await user.click(submitButton);
 
@@ -175,11 +175,11 @@ describe('Login Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
-    await user.type(usernameInput, 'testuser');
+    await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.click(submitButton);
 
@@ -187,7 +187,7 @@ describe('Login Component', () => {
     expect(submitButton).toBeDisabled();
 
     // Resolve the login
-    resolveLogin({ success: true, user: { username: 'testuser' } });
+    resolveLogin({ success: true, user: { email: 'test@example.com' } });
 
     await waitFor(() => {
       expect(screen.queryByText(/signing in/i)).not.toBeInTheDocument();

@@ -63,7 +63,7 @@ export class ResetPasswordFormHandler {
     try {
       // Attempt password reset
       const authResult = await this.config.authService.resetPassword(
-        data.username,
+        data.email,
         data.code,
         data.newPassword,
       );

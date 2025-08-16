@@ -29,7 +29,7 @@ export const ResetPassword = () => {
   const { isLoading, error, clearError } = authContext;
 
   const [formData, setFormData] = useState({
-    username: searchParams.get('username') || '',
+    email: searchParams.get('email') || '',
     code: searchParams.get('code') || '',
     newPassword: '',
     confirmPassword: '',
@@ -131,18 +131,18 @@ export const ResetPassword = () => {
 
         <Box as="form" width="100%" onSubmit={handleSubmit}>
           <VStack spacing={4}>
-            <FormControl isInvalid={!!formErrors.username}>
-              <FormLabel htmlFor="username">Username</FormLabel>
+            <FormControl isInvalid={!!formErrors.email}>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Enter your username"
-                autoComplete="username"
+                placeholder="Enter your email"
+                autoComplete="email"
               />
-              <FormErrorMessage>{formErrors.username}</FormErrorMessage>
+              <FormErrorMessage>{formErrors.email}</FormErrorMessage>
             </FormControl>
 
             <FormControl isInvalid={!!formErrors.code}>

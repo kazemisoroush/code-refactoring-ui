@@ -49,9 +49,7 @@ const TestComponent = () => {
       </button>
       <button
         data-testid="signup-btn"
-        onClick={() =>
-          auth.signup('testuser', 'password123', 'test@example.com')
-        }
+        onClick={() => auth.signup('test@example.com', 'password123')}
       >
         Signup
       </button>
@@ -262,9 +260,8 @@ describe('AuthContext', () => {
 
       await waitFor(() => {
         expect(authService.signUp).toHaveBeenCalledWith(
-          'testuser',
-          'password123',
           'test@example.com',
+          'password123',
         );
       });
     });
@@ -276,7 +273,7 @@ describe('AuthContext', () => {
       });
       authService.signUp.mockResolvedValue({
         success: false,
-        message: 'Username already exists',
+        message: 'Email already exists',
       });
 
       render(
@@ -297,7 +294,7 @@ describe('AuthContext', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('error')).toHaveTextContent(
-          'Username already exists',
+          'Email already exists',
         );
       });
     });

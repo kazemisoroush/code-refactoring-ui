@@ -7,10 +7,10 @@ describe('ResetPasswordValidator', () => {
     validator = createResetPasswordValidator();
   });
 
-  describe('username validation', () => {
-    test('should require username', () => {
+  describe('email validation', () => {
+    test('should require email', () => {
       const data = {
-        username: '',
+        email: '',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -19,12 +19,12 @@ describe('ResetPasswordValidator', () => {
       const result = validator.validate(data);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.username).toBe('Username is required');
+      expect(result.errors.email).toBe('Email is required');
     });
 
-    test('should require non-whitespace username', () => {
+    test('should require non-whitespace email', () => {
       const data = {
-        username: '   ',
+        email: '   ',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -33,12 +33,12 @@ describe('ResetPasswordValidator', () => {
       const result = validator.validate(data);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.username).toBe('Username is required');
+      expect(result.errors.email).toBe('Email is required');
     });
 
-    test('should accept valid username', () => {
+    test('should accept valid email', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -46,14 +46,14 @@ describe('ResetPasswordValidator', () => {
 
       const result = validator.validate(data);
 
-      expect(result.errors.username).toBeUndefined();
+      expect(result.errors.email).toBeUndefined();
     });
   });
 
   describe('verification code validation', () => {
     test('should require verification code', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -67,7 +67,7 @@ describe('ResetPasswordValidator', () => {
 
     test('should accept valid verification code', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -82,7 +82,7 @@ describe('ResetPasswordValidator', () => {
   describe('password validation', () => {
     test('should require new password', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: '',
         confirmPassword: 'password123',
@@ -96,7 +96,7 @@ describe('ResetPasswordValidator', () => {
 
     test('should enforce minimum password length', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: '123',
         confirmPassword: '123',
@@ -112,7 +112,7 @@ describe('ResetPasswordValidator', () => {
 
     test('should require password confirmation', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: '',
@@ -128,7 +128,7 @@ describe('ResetPasswordValidator', () => {
 
     test('should require passwords to match', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'different123',
@@ -142,7 +142,7 @@ describe('ResetPasswordValidator', () => {
 
     test('should accept valid matching passwords', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -158,7 +158,7 @@ describe('ResetPasswordValidator', () => {
   describe('overall validation', () => {
     test('should return valid result for complete valid data', () => {
       const data = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -172,7 +172,7 @@ describe('ResetPasswordValidator', () => {
 
     test('should return all validation errors for invalid data', () => {
       const data = {
-        username: '',
+        email: '',
         code: '',
         newPassword: '',
         confirmPassword: '',
@@ -181,7 +181,7 @@ describe('ResetPasswordValidator', () => {
       const result = validator.validate(data);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.username).toBeDefined();
+      expect(result.errors.email).toBeDefined();
       expect(result.errors.code).toBeDefined();
       expect(result.errors.newPassword).toBeDefined();
       expect(result.errors.confirmPassword).toBeDefined();

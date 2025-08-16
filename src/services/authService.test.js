@@ -42,16 +42,19 @@ describe('AuthService', () => {
       const mockData = {
         access_token: 'mock-access-token',
         refresh_token: 'mock-refresh-token',
-        user: { username: 'testuser', email: 'test@example.com' },
+        user: { email: 'test@example.com' },
       };
 
       apiClient.post.mockResolvedValue(mockResponse);
       apiClient.handleResponse.mockResolvedValue(mockData);
 
-      const result = await authService.signIn('testuser', 'password123');
+      const result = await authService.signIn(
+        'test@example.com',
+        'password123',
+      );
 
       expect(apiClient.post).toHaveBeenCalledWith('/auth/signin', {
-        username: 'testuser',
+        username: 'test@example.com',
         password: 'password123',
       });
       expect(tokenStorage.setToken).toHaveBeenCalledWith('mock-access-token');
@@ -75,7 +78,10 @@ describe('AuthService', () => {
       apiClient.post.mockResolvedValue(mockResponse);
       apiClient.handleError.mockResolvedValue(errorMessage);
 
-      const result = await authService.signIn('testuser', 'wrongpassword');
+      const result = await authService.signIn(
+        'test@example.com',
+        'wrongpassword',
+      );
 
       expect(result).toEqual({
         success: false,
@@ -105,7 +111,7 @@ describe('AuthService', () => {
       const mockData = {
         access_token: 'mock-access-token',
         refresh_token: 'mock-refresh-token',
-        user: { username: 'testuser', email: 'test@example.com' },
+        user: { email: 'test@example.com' },
         user_id: 'user-123',
         message: 'Sign up successful',
       };
@@ -114,15 +120,13 @@ describe('AuthService', () => {
       apiClient.handleResponse.mockResolvedValue(mockData);
 
       const result = await authService.signUp(
-        'testuser',
-        'password123',
         'test@example.com',
+        'password123',
       );
 
       expect(apiClient.post).toHaveBeenCalledWith('/auth/signup', {
-        username: 'testuser',
+        username: 'test@example.com',
         password: 'password123',
-        email: 'test@example.com',
       });
       expect(result).toEqual({
         success: true,
@@ -136,15 +140,14 @@ describe('AuthService', () => {
       const mockResponse = {
         ok: false,
       };
-      const errorMessage = 'Username already exists';
+      const errorMessage = 'Email already exists';
 
       apiClient.post.mockResolvedValue(mockResponse);
       apiClient.handleError.mockResolvedValue(errorMessage);
 
       const result = await authService.signUp(
-        'testuser',
-        'password123',
         'test@example.com',
+        'password123',
       );
 
       expect(result).toEqual({
@@ -198,7 +201,6 @@ describe('AuthService', () => {
   describe('getCurrentUser', () => {
     it('should return user data from storage when authenticated', async () => {
       const mockUser = {
-        username: 'testuser',
         email: 'test@example.com',
       };
 
@@ -219,7 +221,7 @@ describe('AuthService', () => {
         ok: true,
       };
       const mockData = {
-        user: { username: 'testuser', email: 'test@example.com' },
+        user: { email: 'test@example.com' },
       };
 
       tokenStorage.isAuthenticated.mockReturnValue(true);

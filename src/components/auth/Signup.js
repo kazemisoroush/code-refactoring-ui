@@ -21,7 +21,6 @@ export const Signup = () => {
   const { signup, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -35,12 +34,6 @@ export const Signup = () => {
 
   const validateForm = () => {
     const errors = {};
-
-    if (!formData.username.trim()) {
-      errors.username = 'Username is required';
-    } else if (formData.username.length < 3) {
-      errors.username = 'Username must be at least 3 characters';
-    }
 
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
@@ -95,11 +88,7 @@ export const Signup = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await signup(
-        formData.username,
-        formData.password,
-        formData.email,
-      );
+      const result = await signup(formData.email, formData.password);
 
       if (result.success) {
         // If signup includes automatic login, navigate to admin
@@ -145,20 +134,6 @@ export const Signup = () => {
 
         <Box as="form" width="100%" onSubmit={handleSubmit}>
           <VStack spacing={4}>
-            <FormControl isInvalid={!!formErrors.username}>
-              <FormLabel htmlFor="username">Username</FormLabel>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleInputChange}
-                placeholder="Enter your username"
-                autoComplete="username"
-              />
-              <FormErrorMessage>{formErrors.username}</FormErrorMessage>
-            </FormControl>
-
             <FormControl isInvalid={!!formErrors.email}>
               <FormLabel htmlFor="email">Email</FormLabel>
               <Input

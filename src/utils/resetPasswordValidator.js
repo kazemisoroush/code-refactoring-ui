@@ -11,8 +11,8 @@ export class ResetPasswordValidator {
   validate(data) {
     const errors = {};
 
-    if (!data.username?.trim()) {
-      errors.username = 'Username is required';
+    if (!data.email?.trim()) {
+      errors.email = 'Email is required';
     }
 
     if (!data.code?.trim()) {

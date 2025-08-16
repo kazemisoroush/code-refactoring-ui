@@ -21,7 +21,7 @@ export const Login = () => {
   const { login, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
 
@@ -34,8 +34,8 @@ export const Login = () => {
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.username.trim()) {
-      errors.username = 'Username is required';
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
     }
 
     if (!formData.password.trim()) {
@@ -77,7 +77,7 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await login(formData.username, formData.password);
+      const result = await login(formData.email, formData.password);
 
       if (result.success) {
         navigate('/admin');
@@ -117,18 +117,18 @@ export const Login = () => {
 
         <Box as="form" width="100%" onSubmit={handleSubmit}>
           <VStack spacing={4}>
-            <FormControl isInvalid={!!formErrors.username}>
-              <FormLabel htmlFor="username">Username</FormLabel>
+            <FormControl isInvalid={!!formErrors.email}>
+              <FormLabel htmlFor="email">Email</FormLabel>
               <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Enter your username"
-                autoComplete="username"
+                placeholder="Enter your email"
+                autoComplete="email"
               />
-              <FormErrorMessage>{formErrors.username}</FormErrorMessage>
+              <FormErrorMessage>{formErrors.email}</FormErrorMessage>
             </FormControl>
 
             <FormControl isInvalid={!!formErrors.password}>

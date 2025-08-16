@@ -45,13 +45,13 @@ describe('ForgotPassword', () => {
     renderWithAuthAndRouter(<ForgotPassword />);
 
     expect(screen.getByText('Forgot Password')).toBeInTheDocument();
-    expect(screen.getByLabelText(/username or email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /send reset instructions/i }),
     ).toBeInTheDocument();
   });
 
-  test('shows validation error for empty username', async () => {
+  test('shows validation error for empty email', async () => {
     renderWithAuthAndRouter(<ForgotPassword />);
 
     const submitButton = screen.getByRole('button', {
@@ -60,9 +60,7 @@ describe('ForgotPassword', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Username or email is required'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Email is required')).toBeInTheDocument();
     });
   });
 
@@ -71,16 +69,16 @@ describe('ForgotPassword', () => {
 
     renderWithAuthAndRouter(<ForgotPassword />);
 
-    const usernameInput = screen.getByLabelText(/username or email/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const submitButton = screen.getByRole('button', {
       name: /send reset instructions/i,
     });
 
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockForgotPassword).toHaveBeenCalledWith('testuser');
+      expect(mockForgotPassword).toHaveBeenCalledWith('test@example.com');
     });
   });
 
@@ -89,8 +87,8 @@ describe('ForgotPassword', () => {
 
     renderWithAuthAndRouter(<ForgotPassword />);
 
-    const usernameInput = screen.getByLabelText(/username/i);
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    const emailInput = screen.getByLabelText(/email/i);
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
 
     const submitButton = screen.getByRole('button', {
       name: /send reset instructions/i,
@@ -101,7 +99,7 @@ describe('ForgotPassword', () => {
       expect(screen.getByText('Check Your Email')).toBeInTheDocument();
       expect(
         screen.getByText(
-          /If an account with that username exists, we've sent you password reset instructions/,
+          /If an account with that email exists, we've sent you password reset instructions/,
         ),
       ).toBeInTheDocument();
     });
@@ -118,12 +116,12 @@ describe('ForgotPassword', () => {
     // Render with error state
     renderWithAuthAndRouter(<ForgotPassword />, { error: errorMessage });
 
-    const usernameInput = screen.getByLabelText(/username or email/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const submitButton = screen.getByRole('button', {
       name: /send reset instructions/i,
     });
 
-    fireEvent.change(usernameInput, { target: { value: 'nonexistent' } });
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -150,12 +148,12 @@ describe('ForgotPassword', () => {
   test('clears error on input change', () => {
     renderWithAuthAndRouter(<ForgotPassword />);
 
-    const usernameInput = screen.getByLabelText(/username or email/i);
-    fireEvent.change(usernameInput, { target: { value: 'test' } });
+    const emailInput = screen.getByLabelText(/email/i);
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
 
     // The clearError function should be called when input changes
     // This test verifies the component structure but the actual clearing
     // happens in the real useAuth hook implementation
-    expect(usernameInput.value).toBe('test');
+    expect(emailInput.value).toBe('test@example.com');
   });
 });

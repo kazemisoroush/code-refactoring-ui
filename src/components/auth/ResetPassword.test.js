@@ -11,7 +11,7 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
   useSearchParams: () => [
-    new URLSearchParams('?username=testuser&code=123456'),
+    new URLSearchParams('?email=test@example.com&code=123456'),
   ],
 }));
 
@@ -56,7 +56,7 @@ describe('ResetPassword Component', () => {
     expect(
       screen.getByRole('heading', { name: /reset password/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/verification code/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
@@ -65,10 +65,10 @@ describe('ResetPassword Component', () => {
     ).toBeInTheDocument();
   });
 
-  test('displays username and code from URL parameters', () => {
+  test('displays email and code from URL parameters', () => {
     renderWithAuthAndRouter(<ResetPassword />);
 
-    expect(screen.getByDisplayValue('testuser')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument();
     expect(screen.getByDisplayValue('123456')).toBeInTheDocument();
   });
 
@@ -80,16 +80,16 @@ describe('ResetPassword Component', () => {
     });
 
     // Clear the prefilled values
-    const usernameInput = screen.getByLabelText(/username/i);
+    const emailInput = screen.getByLabelText(/email/i);
     const codeInput = screen.getByLabelText(/verification code/i);
 
-    fireEvent.change(usernameInput, { target: { value: '' } });
+    fireEvent.change(emailInput, { target: { value: '' } });
     fireEvent.change(codeInput, { target: { value: '' } });
 
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Username is required')).toBeInTheDocument();
+      expect(screen.getByText('Email is required')).toBeInTheDocument();
       expect(
         screen.getByText('Verification code is required'),
       ).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe('ResetPassword Component', () => {
 
     await waitFor(() => {
       expect(mockResetPassword).toHaveBeenCalledWith(
-        'testuser',
+        'test@example.com',
         '123456',
         'newpassword123',
       );

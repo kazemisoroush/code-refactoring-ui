@@ -94,6 +94,7 @@ export default function AuthNavbar(props) {
     <Link
       href={`${process.env.PUBLIC_URL}/#/`}
       target="_blank"
+      rel="noreferrer"
       display="flex"
       lineHeight="100%"
       fontWeight="bold"
@@ -115,6 +116,7 @@ export default function AuthNavbar(props) {
         minW="175px"
         href={`${process.env.PUBLIC_URL}/#/`}
         target="_blank"
+        rel="noreferrer"
         display="flex"
         lineHeight="100%"
         fontWeight="bold"

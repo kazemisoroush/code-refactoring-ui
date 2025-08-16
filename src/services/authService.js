@@ -2,11 +2,11 @@ import { apiClient } from '../utils/apiClient';
 import { tokenStorage } from '../utils/tokenStorage';
 
 export class AuthService {
-  // Sign in user
-  async signIn(username, password) {
+  // Sign in user - Frontend uses email, backend expects username
+  async signIn(email, password) {
     try {
       const response = await apiClient.post('/auth/signin', {
-        username,
+        username: email, // Map email to username for backend
         password,
       });
 
@@ -44,13 +44,12 @@ export class AuthService {
     }
   }
 
-  // Sign up user
-  async signUp(username, password, email) {
+  // Sign up user - Frontend uses email, backend expects username
+  async signUp(email, password) {
     try {
       const response = await apiClient.post('/auth/signup', {
-        username,
+        username: email, // Map email to username for backend
         password,
-        email,
       });
 
       if (!response.ok) {
@@ -90,12 +89,11 @@ export class AuthService {
     }
   }
 
-  // Confirm sign up with verification code (if needed by the API)
-  async confirmSignUp(username, code) {
+  // Confirm sign up with verification code
+  async confirmSignUp(email, code) {
     try {
-      // This endpoint might not exist in the current API, but keeping for compatibility
       const response = await apiClient.post('/auth/confirm', {
-        username,
+        username: email, // Map email to username for backend
         code,
       });
 
@@ -155,11 +153,10 @@ export class AuthService {
   }
 
   // Forgot password
-  async forgotPassword(username) {
+  async forgotPassword(email) {
     try {
-      // This endpoint might not exist in the current API, but keeping for compatibility
       const response = await apiClient.post('/auth/forgot-password', {
-        username,
+        username: email, // Map email to username for backend
       });
 
       if (!response.ok) {
@@ -185,11 +182,10 @@ export class AuthService {
   }
 
   // Confirm forgot password
-  async forgotPasswordSubmit(username, code, newPassword) {
+  async forgotPasswordSubmit(email, code, newPassword) {
     try {
-      // This endpoint might not exist in the current API, but keeping for compatibility
       const response = await apiClient.post('/auth/reset-password', {
-        username,
+        username: email, // Map email to username for backend
         code,
         new_password: newPassword,
       });

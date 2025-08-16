@@ -29,13 +29,13 @@ describe('ResetPasswordFormHandler', () => {
   describe('validateForm', () => {
     test('should return validation errors from validator', () => {
       const formData = {
-        username: '',
+        email: '',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
       };
 
-      const expectedErrors = { username: 'Username is required' };
+      const expectedErrors = { email: 'Email is required' };
       mockValidator.validate.mockReturnValue({
         isValid: false,
         errors: expectedErrors,
@@ -51,7 +51,7 @@ describe('ResetPasswordFormHandler', () => {
   describe('isFormValid', () => {
     test('should return true for valid form', () => {
       const formData = {
-        username: 'testuser',
+        email: 'test@example.com',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -70,7 +70,7 @@ describe('ResetPasswordFormHandler', () => {
 
     test('should return false for invalid form', () => {
       const formData = {
-        username: '',
+        email: '',
         code: '123456',
         newPassword: 'password123',
         confirmPassword: 'password123',
@@ -78,7 +78,7 @@ describe('ResetPasswordFormHandler', () => {
 
       mockValidator.validate.mockReturnValue({
         isValid: false,
-        errors: { username: 'Username is required' },
+        errors: { email: 'Email is required' },
       });
 
       const isValid = formHandler.isFormValid(formData);
@@ -90,14 +90,14 @@ describe('ResetPasswordFormHandler', () => {
 
   describe('submitForm', () => {
     const validFormData = {
-      username: 'testuser',
+      email: 'test@example.com',
       code: '123456',
       newPassword: 'password123',
       confirmPassword: 'password123',
     };
 
     test('should return validation errors if form is invalid', async () => {
-      const validationErrors = { username: 'Username is required' };
+      const validationErrors = { email: 'Email is required' };
       mockValidator.validate.mockReturnValue({
         isValid: false,
         errors: validationErrors,
@@ -126,7 +126,7 @@ describe('ResetPasswordFormHandler', () => {
       const result = await formHandler.submitForm(validFormData);
 
       expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
-        'testuser',
+        'test@example.com',
         '123456',
         'password123',
       );
@@ -150,7 +150,7 @@ describe('ResetPasswordFormHandler', () => {
       const result = await formHandler.submitForm(validFormData);
 
       expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
-        'testuser',
+        'test@example.com',
         '123456',
         'password123',
       );
@@ -178,7 +178,7 @@ describe('ResetPasswordFormHandler', () => {
       const result = await formHandler.submitForm(validFormData);
 
       expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
-        'testuser',
+        'test@example.com',
         '123456',
         'password123',
       );

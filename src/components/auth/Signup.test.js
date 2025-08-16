@@ -44,7 +44,6 @@ describe('Signup Component', () => {
     expect(
       screen.getByRole('heading', { name: /sign up/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
@@ -63,17 +62,14 @@ describe('Signup Component', () => {
     const user = userEvent.setup();
     renderWithAuthAndRouter(<Signup />);
 
-    const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
 
-    await user.type(usernameInput, 'testuser');
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
 
-    expect(usernameInput).toHaveValue('testuser');
     expect(emailInput).toHaveValue('test@example.com');
     expect(passwordInput).toHaveValue('password123');
     expect(confirmPasswordInput).toHaveValue('password123');
@@ -93,7 +89,6 @@ describe('Signup Component', () => {
     const submitButton = screen.getByRole('button', { name: /sign up/i });
     await user.click(submitButton);
 
-    expect(screen.getByText(/username is required/i)).toBeInTheDocument();
     expect(screen.getByText(/email is required/i)).toBeInTheDocument();
     expect(screen.getByText(/^password is required/i)).toBeInTheDocument();
     expect(
@@ -112,23 +107,18 @@ describe('Signup Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
     // Invalid inputs
-    await user.type(usernameInput, 'ab'); // too short
     await user.type(emailInput, 'invalid-email'); // invalid email
     await user.type(passwordInput, '123'); // too short
     await user.type(confirmPasswordInput, '456'); // doesn't match
 
     await user.click(submitButton);
 
-    expect(
-      screen.getByText(/username must be at least 3 characters/i),
-    ).toBeInTheDocument();
     expect(screen.getByText(/email address is invalid/i)).toBeInTheDocument();
     expect(
       screen.getByText(/password must be at least 8 characters/i),
@@ -140,7 +130,7 @@ describe('Signup Component', () => {
     const user = userEvent.setup();
     authService.signUp.mockResolvedValue({
       success: true,
-      user: { username: 'testuser', email: 'test@example.com' },
+      user: { email: 'test@example.com' },
       message: 'Signup successful',
     });
 
@@ -153,13 +143,11 @@ describe('Signup Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
-    await user.type(usernameInput, 'testuser');
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -167,9 +155,8 @@ describe('Signup Component', () => {
 
     await waitFor(() => {
       expect(authService.signUp).toHaveBeenCalledWith(
-        'testuser',
-        'password123',
         'test@example.com',
+        'password123',
       );
     });
 
@@ -195,13 +182,11 @@ describe('Signup Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
-    await user.type(usernameInput, 'testuser');
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -216,7 +201,7 @@ describe('Signup Component', () => {
     const user = userEvent.setup();
     authService.signUp.mockResolvedValue({
       success: false,
-      message: 'Username already exists',
+      message: 'Email already exists',
     });
 
     renderWithAuthAndRouter(<Signup />);
@@ -228,20 +213,18 @@ describe('Signup Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
-    await user.type(usernameInput, 'testuser');
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/username already exists/i)).toBeInTheDocument();
+      expect(screen.getByText(/email already exists/i)).toBeInTheDocument();
     });
 
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -265,13 +248,11 @@ describe('Signup Component', () => {
       ).toBeInTheDocument();
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
-    await user.type(usernameInput, 'testuser');
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -281,7 +262,7 @@ describe('Signup Component', () => {
     expect(submitButton).toBeDisabled();
 
     // Resolve the signup
-    resolveSignup({ success: true, user: { username: 'testuser' } });
+    resolveSignup({ success: true, user: { email: 'test@example.com' } });
 
     await waitFor(() => {
       expect(screen.queryByText(/creating account/i)).not.toBeInTheDocument();
