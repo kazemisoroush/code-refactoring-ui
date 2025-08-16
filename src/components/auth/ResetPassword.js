@@ -17,10 +17,6 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { createResetPasswordValidator } from '../../utils/resetPasswordValidator';
 import { createResetPasswordFormHandler } from '../../utils/resetPasswordFormHandler';
-import {
-  createAuthContextAdapter,
-  createReactRouterNavigationAdapter,
-} from '../../adapters/authAdapters';
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
@@ -43,22 +39,14 @@ export const ResetPassword = () => {
 
   // Create instances of our business logic with dependency injection
   const validator = useMemo(() => createResetPasswordValidator(), []);
-  const authService = useMemo(
-    () => createAuthContextAdapter(authContext),
-    [authContext],
-  );
-  const navigationService = useMemo(
-    () => createReactRouterNavigationAdapter(navigate),
-    [navigate],
-  );
   const formHandler = useMemo(
     () =>
       createResetPasswordFormHandler({
         validator,
-        authService,
-        navigationService,
+        resetPassword: authContext.resetPassword,
+        navigate,
       }),
-    [validator, authService, navigationService],
+    [validator, authContext.resetPassword, navigate],
   );
 
   const handleInputChange = (e) => {

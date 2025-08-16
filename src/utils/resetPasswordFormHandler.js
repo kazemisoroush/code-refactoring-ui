@@ -1,8 +1,16 @@
 /**
+ * @typedef {Object} ResetPasswordFormData
+ * @property {string} username - Username for password reset
+ * @property {string} code - Verification code from email
+ * @property {string} newPassword - New password
+ * @property {string} confirmPassword - Password confirmation
+ */
+
+/**
  * @typedef {Object} ResetPasswordConfig
  * @property {import('./resetPasswordValidator.js').ResetPasswordValidator} validator - Form validator
- * @property {Object} authService - Authentication service
- * @property {Object} navigationService - Navigation service
+ * @property {Function} resetPassword - Reset password function from AuthContext
+ * @property {Function} navigate - Navigate function from React Router
  */
 
 /**
@@ -27,7 +35,7 @@ export class ResetPasswordFormHandler {
 
   /**
    * Validates form data
-   * @param {import('../interfaces/auth.js').ResetPasswordFormData} data - Form data to validate
+   * @param {ResetPasswordFormData} data - Form data to validate
    * @returns {Record<string, string>} Validation errors
    */
   validateForm(data) {
@@ -37,7 +45,7 @@ export class ResetPasswordFormHandler {
 
   /**
    * Checks if form data is valid
-   * @param {import('../interfaces/auth.js').ResetPasswordFormData} data - Form data to validate
+   * @param {ResetPasswordFormData} data - Form data to validate
    * @returns {boolean} Whether form is valid
    */
   isFormValid(data) {
@@ -47,7 +55,7 @@ export class ResetPasswordFormHandler {
 
   /**
    * Handles form submission
-   * @param {import('../interfaces/auth.js').ResetPasswordFormData} data - Form data to submit
+   * @param {ResetPasswordFormData} data - Form data to submit
    * @returns {Promise<FormSubmissionResult>} Submission result
    */
   async submitForm(data) {
@@ -62,7 +70,7 @@ export class ResetPasswordFormHandler {
 
     try {
       // Attempt password reset
-      const authResult = await this.config.authService.resetPassword(
+      const authResult = await this.config.resetPassword(
         data.email,
         data.code,
         data.newPassword,
@@ -70,9 +78,12 @@ export class ResetPasswordFormHandler {
 
       if (authResult.success) {
         // Navigate to sign in on success
-        this.config.navigationService.navigateToSignIn(
-          'Password reset successful. Please sign in with your new password.',
-        );
+        this.config.navigate('/auth/signin', {
+          state: {
+            message:
+              'Password reset successful. Please sign in with your new password.',
+          },
+        });
         return { success: true };
       } else {
         return {

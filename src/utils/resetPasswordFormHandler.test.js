@@ -2,8 +2,8 @@ import { createResetPasswordFormHandler } from './resetPasswordFormHandler.js';
 
 describe('ResetPasswordFormHandler', () => {
   let mockValidator;
-  let mockAuthService;
-  let mockNavigationService;
+  let mockResetPassword;
+  let mockNavigate;
   let formHandler;
 
   beforeEach(() => {
@@ -11,18 +11,13 @@ describe('ResetPasswordFormHandler', () => {
       validate: jest.fn(),
     };
 
-    mockAuthService = {
-      resetPassword: jest.fn(),
-    };
-
-    mockNavigationService = {
-      navigateToSignIn: jest.fn(),
-    };
+    mockResetPassword = jest.fn();
+    mockNavigate = jest.fn();
 
     formHandler = createResetPasswordFormHandler({
       validator: mockValidator,
-      authService: mockAuthService,
-      navigationService: mockNavigationService,
+      resetPassword: mockResetPassword,
+      navigate: mockNavigate,
     });
   });
 
@@ -109,99 +104,75 @@ describe('ResetPasswordFormHandler', () => {
         success: false,
         validationErrors,
       });
-      expect(mockAuthService.resetPassword).not.toHaveBeenCalled();
-      expect(mockNavigationService.navigateToSignIn).not.toHaveBeenCalled();
+
+      expect(mockResetPassword).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     test('should handle successful password reset', async () => {
-      mockValidator.validate.mockReturnValue({
-        isValid: true,
-        errors: {},
-      });
-
-      mockAuthService.resetPassword.mockResolvedValue({
+      mockValidator.validate.mockReturnValue({ isValid: true, errors: {} });
+      mockResetPassword.mockResolvedValue({
         success: true,
       });
 
       const result = await formHandler.submitForm(validFormData);
 
-      expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
+      expect(mockResetPassword).toHaveBeenCalledWith(
         'test@example.com',
         '123456',
         'password123',
       );
-      expect(mockNavigationService.navigateToSignIn).toHaveBeenCalledWith(
-        'Password reset successful. Please sign in with your new password.',
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/auth/signin', {
+        state: {
+          message:
+            'Password reset successful. Please sign in with your new password.',
+        },
+      });
       expect(result).toEqual({ success: true });
     });
 
     test('should handle failed password reset', async () => {
-      mockValidator.validate.mockReturnValue({
-        isValid: true,
-        errors: {},
-      });
-
-      mockAuthService.resetPassword.mockResolvedValue({
+      mockValidator.validate.mockReturnValue({ isValid: true, errors: {} });
+      mockResetPassword.mockResolvedValue({
         success: false,
-        error: 'Invalid verification code',
+        error: 'Invalid code',
       });
 
       const result = await formHandler.submitForm(validFormData);
 
-      expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
+      expect(mockResetPassword).toHaveBeenCalledWith(
         'test@example.com',
         '123456',
         'password123',
       );
-      expect(mockNavigationService.navigateToSignIn).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
       expect(result).toEqual({
         success: false,
-        error: 'Invalid verification code',
+        error: 'Invalid code',
       });
     });
 
-    test('should handle auth service errors', async () => {
-      mockValidator.validate.mockReturnValue({
-        isValid: true,
-        errors: {},
-      });
-
-      mockAuthService.resetPassword.mockRejectedValue(
-        new Error('Network error'),
-      );
-
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
+    test('should handle unexpected errors', async () => {
+      mockValidator.validate.mockReturnValue({ isValid: true, errors: {} });
+      mockResetPassword.mockRejectedValue(new Error('Network error'));
 
       const result = await formHandler.submitForm(validFormData);
 
-      expect(mockAuthService.resetPassword).toHaveBeenCalledWith(
+      expect(mockResetPassword).toHaveBeenCalledWith(
         'test@example.com',
         '123456',
         'password123',
       );
-      expect(mockNavigationService.navigateToSignIn).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
       expect(result).toEqual({
         success: false,
         error: 'An unexpected error occurred',
       });
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Reset password error:',
-        expect.any(Error),
-      );
-
-      consoleSpy.mockRestore();
     });
 
-    test('should handle auth result without explicit error message', async () => {
-      mockValidator.validate.mockReturnValue({
-        isValid: true,
-        errors: {},
-      });
-
-      mockAuthService.resetPassword.mockResolvedValue({
+    test('should handle auth result without error message', async () => {
+      mockValidator.validate.mockReturnValue({ isValid: true, errors: {} });
+      mockResetPassword.mockResolvedValue({
         success: false,
       });
 

@@ -1,12 +1,26 @@
 /**
+ * @typedef {Object} ResetPasswordFormData
+ * @property {string} username - Username for password reset
+ * @property {string} code - Verification code from email
+ * @property {string} newPassword - New password
+ * @property {string} confirmPassword - Password confirmation
+ */
+
+/**
+ * @typedef {Object} ValidationResult
+ * @property {boolean} isValid - Whether the validation passed
+ * @property {Record<string, string>} errors - Validation error messages by field
+ */
+
+/**
  * Password reset form validator implementation
  * This class encapsulates all validation logic and can be easily tested
  */
 export class ResetPasswordValidator {
   /**
    * Validates reset password form data
-   * @param {import('../interfaces/auth.js').ResetPasswordFormData} data - Form data to validate
-   * @returns {import('../interfaces/auth.js').ValidationResult} Validation result
+   * @param {ResetPasswordFormData} data - Form data to validate
+   * @returns {ValidationResult} Validation result
    */
   validate(data) {
     const errors = {};
