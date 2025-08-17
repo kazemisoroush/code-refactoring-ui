@@ -17,6 +17,9 @@ import Projects from 'views/admin/projects';
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
+import SignUpCentered from 'views/auth/signUp';
+import ForgotPasswordCentered from 'views/auth/forgotPassword';
+import ResetPasswordCentered from 'views/auth/resetPassword';
 
 const routes = [
   {
@@ -65,6 +68,27 @@ export const authRoutes = [
     path: '/sign-in',
     icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
     component: <SignInCentered />,
+  },
+  {
+    name: 'Sign Up',
+    layout: '/auth',
+    path: '/sign-up',
+    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
+    component: <SignUpCentered />,
+  },
+  {
+    name: 'Forgot Password',
+    layout: '/auth',
+    path: '/forgot-password',
+    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
+    component: <ForgotPasswordCentered />,
+  },
+  {
+    name: 'Reset Password',
+    layout: '/auth',
+    path: '/reset-password',
+    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
+    component: <ResetPasswordCentered />,
   },
 ];
 
