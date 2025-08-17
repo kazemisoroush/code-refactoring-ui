@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/authService';
 import { useTokenRefresh } from '../hooks/useTokenRefresh';
+import { enhanceUser } from '../models/User';
 
 // Authentication state
 const initialState = {
@@ -31,7 +32,7 @@ const authReducer = (state, action) => {
     case authActions.LOGIN_SUCCESS:
       return {
         ...state,
-        user: action.payload,
+        user: enhanceUser(action.payload),
         isAuthenticated: true,
         isLoading: false,
         error: null,
