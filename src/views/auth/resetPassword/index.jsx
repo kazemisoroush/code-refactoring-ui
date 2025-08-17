@@ -22,12 +22,11 @@
 */
 
 import React from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 // Chakra imports
 import {
   Box,
   Button,
-  Checkbox,
   Flex,
   FormControl,
   FormLabel,
@@ -51,7 +50,7 @@ import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import { RiEyeCloseLine } from 'react-icons/ri';
 import { useAuth } from 'contexts/AuthContext';
 
-function SignIn() {
+function ResetPassword() {
   // Chakra color mode
   const textColor = useColorModeValue('navy.700', 'white');
   const textColorSecondary = 'gray.400';
@@ -70,28 +69,101 @@ function SignIn() {
   );
 
   // Authentication state
-  const { login, isLoading, error, clearError } = useAuth();
+  const { resetPassword, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   // Form state
   const [show, setShow] = React.useState(false);
-  const [email, setEmail] = React.useState(location.state?.email || '');
-  const [password, setPassword] = React.useState('');
+  const [showConfirm, setShowConfirm] = React.useState(false);
+  const [email, setEmail] = React.useState(searchParams.get('email') || '');
+  const [code, setCode] = React.useState(searchParams.get('code') || '');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [formErrors, setFormErrors] = React.useState({});
 
   const handleClick = () => setShow(!show);
+  const handleConfirmClick = () => setShowConfirm(!showConfirm);
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = 'Email address is invalid';
+    }
+
+    if (!code.trim()) {
+      errors.code = 'Verification code is required';
+    }
+
+    if (!newPassword.trim()) {
+      errors.newPassword = 'New password is required';
+    } else if (newPassword.length < 8) {
+      errors.newPassword = 'Password must be at least 8 characters';
+    }
+
+    if (!confirmPassword.trim()) {
+      errors.confirmPassword = 'Please confirm your new password';
+    } else if (newPassword !== confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearError();
 
-    const result = await login(email, password);
+    if (!validateForm()) {
+      return;
+    }
+
+    const result = await resetPassword(email, code, newPassword);
     if (result.success) {
-      // Redirect to the page they tried to visit or admin dashboard
-      const from = location.state?.from?.pathname || '/admin/default';
-      navigate(from, { replace: true });
+      // Redirect to sign in page with success message
+      navigate('/auth/sign-in', {
+        state: {
+          message:
+            'Password reset successfully. Please sign in with your new password.',
+          email: email,
+        },
+      });
     }
   };
+
+  // Clear field errors when user starts typing
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (formErrors.email) {
+      setFormErrors({ ...formErrors, email: '' });
+    }
+  };
+
+  const handleCodeChange = (e) => {
+    setCode(e.target.value);
+    if (formErrors.code) {
+      setFormErrors({ ...formErrors, code: '' });
+    }
+  };
+
+  const handleNewPasswordChange = (e) => {
+    setNewPassword(e.target.value);
+    if (formErrors.newPassword) {
+      setFormErrors({ ...formErrors, newPassword: '' });
+    }
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    if (formErrors.confirmPassword) {
+      setFormErrors({ ...formErrors, confirmPassword: '' });
+    }
+  };
+
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
       <Flex
@@ -109,7 +181,7 @@ function SignIn() {
       >
         <Box me="auto">
           <Heading color={textColor} fontSize="36px" mb="10px">
-            Sign In
+            Reset Password
           </Heading>
           <Text
             mb="36px"
@@ -118,7 +190,7 @@ function SignIn() {
             fontWeight="400"
             fontSize="md"
           >
-            Enter your email and password to sign in!
+            Enter the verification code and your new password!
           </Text>
         </Box>
         <Flex
@@ -147,7 +219,7 @@ function SignIn() {
             _focus={googleActive}
           >
             <Icon as={FcGoogle} w="20px" h="20px" me="10px" />
-            Sign in with Google
+            Reset with Google
           </Button>
           <Flex align="center" mb="25px">
             <HSeparator />
@@ -163,12 +235,7 @@ function SignIn() {
                 {error}
               </Alert>
             )}
-            {location.state?.message && (
-              <Alert status="success" mb="20px" borderRadius="8px">
-                <AlertIcon />
-                {location.state.message}
-              </Alert>
-            )}
+
             <FormLabel
               display="flex"
               ms="4px"
@@ -186,12 +253,19 @@ function SignIn() {
               ms={{ base: '0px', md: '0px' }}
               type="email"
               placeholder="mail@simmmple.com"
-              mb="24px"
+              mb={formErrors.email ? '8px' : '24px'}
               fontWeight="500"
               size="lg"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
+              isInvalid={!!formErrors.email}
             />
+            {formErrors.email && (
+              <Text color="red.500" fontSize="sm" mb="16px">
+                {formErrors.email}
+              </Text>
+            )}
+
             <FormLabel
               ms="4px"
               fontSize="sm"
@@ -199,19 +273,49 @@ function SignIn() {
               color={textColor}
               display="flex"
             >
-              Password<Text color={brandStars}>*</Text>
+              Verification Code<Text color={brandStars}>*</Text>
+            </FormLabel>
+            <Input
+              isRequired={true}
+              variant="auth"
+              fontSize="sm"
+              ms={{ base: '0px', md: '0px' }}
+              type="text"
+              placeholder="Enter verification code"
+              mb={formErrors.code ? '8px' : '24px'}
+              fontWeight="500"
+              size="lg"
+              value={code}
+              onChange={handleCodeChange}
+              isInvalid={!!formErrors.code}
+            />
+            {formErrors.code && (
+              <Text color="red.500" fontSize="sm" mb="16px">
+                {formErrors.code}
+              </Text>
+            )}
+
+            <FormLabel
+              ms="4px"
+              fontSize="sm"
+              fontWeight="500"
+              color={textColor}
+              display="flex"
+            >
+              New Password<Text color={brandStars}>*</Text>
             </FormLabel>
             <InputGroup size="md">
               <Input
                 isRequired={true}
                 fontSize="sm"
                 placeholder="Min. 8 characters"
-                mb="24px"
+                mb={formErrors.newPassword ? '8px' : '24px'}
                 size="lg"
                 type={show ? 'text' : 'password'}
                 variant="auth"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={newPassword}
+                onChange={handleNewPasswordChange}
+                isInvalid={!!formErrors.newPassword}
               />
               <InputRightElement display="flex" alignItems="center" mt="4px">
                 <Icon
@@ -222,34 +326,49 @@ function SignIn() {
                 />
               </InputRightElement>
             </InputGroup>
-            <Flex justifyContent="space-between" align="center" mb="24px">
-              <FormControl display="flex" alignItems="center">
-                <Checkbox
-                  id="remember-login"
-                  colorScheme="brandScheme"
-                  me="10px"
+            {formErrors.newPassword && (
+              <Text color="red.500" fontSize="sm" mb="16px">
+                {formErrors.newPassword}
+              </Text>
+            )}
+
+            <FormLabel
+              ms="4px"
+              fontSize="sm"
+              fontWeight="500"
+              color={textColor}
+              display="flex"
+            >
+              Confirm New Password<Text color={brandStars}>*</Text>
+            </FormLabel>
+            <InputGroup size="md">
+              <Input
+                isRequired={true}
+                fontSize="sm"
+                placeholder="Confirm your new password"
+                mb={formErrors.confirmPassword ? '8px' : '24px'}
+                size="lg"
+                type={showConfirm ? 'text' : 'password'}
+                variant="auth"
+                value={confirmPassword}
+                onChange={handleConfirmPasswordChange}
+                isInvalid={!!formErrors.confirmPassword}
+              />
+              <InputRightElement display="flex" alignItems="center" mt="4px">
+                <Icon
+                  color={textColorSecondary}
+                  _hover={{ cursor: 'pointer' }}
+                  as={showConfirm ? RiEyeCloseLine : MdOutlineRemoveRedEye}
+                  onClick={handleConfirmClick}
                 />
-                <FormLabel
-                  htmlFor="remember-login"
-                  mb="0"
-                  fontWeight="normal"
-                  color={textColor}
-                  fontSize="sm"
-                >
-                  Keep me logged in
-                </FormLabel>
-              </FormControl>
-              <NavLink to="/auth/forgot-password">
-                <Text
-                  color={textColorBrand}
-                  fontSize="sm"
-                  w="124px"
-                  fontWeight="500"
-                >
-                  Forgot password?
-                </Text>
-              </NavLink>
-            </Flex>
+              </InputRightElement>
+            </InputGroup>
+            {formErrors.confirmPassword && (
+              <Text color="red.500" fontSize="sm" mb="16px">
+                {formErrors.confirmPassword}
+              </Text>
+            )}
+
             <Button
               fontSize="sm"
               variant="brand"
@@ -259,9 +378,9 @@ function SignIn() {
               mb="24px"
               type="submit"
               isLoading={isLoading}
-              loadingText="Signing In..."
+              loadingText="Resetting Password..."
             >
-              Sign In
+              Reset Password
             </Button>
           </FormControl>
           <Flex
@@ -272,7 +391,25 @@ function SignIn() {
             mt="0px"
           >
             <Text color={textColorDetails} fontWeight="400" fontSize="14px">
-              Not registered yet?
+              Remember your password?
+              <NavLink to="/auth/sign-in">
+                <Text
+                  color={textColorBrand}
+                  as="span"
+                  ms="5px"
+                  fontWeight="500"
+                >
+                  Sign In
+                </Text>
+              </NavLink>
+            </Text>
+            <Text
+              color={textColorDetails}
+              fontWeight="400"
+              fontSize="14px"
+              mt="10px"
+            >
+              Don't have an account?
               <NavLink to="/auth/sign-up">
                 <Text
                   color={textColorBrand}
@@ -280,7 +417,7 @@ function SignIn() {
                   ms="5px"
                   fontWeight="500"
                 >
-                  Create an Account
+                  Sign Up
                 </Text>
               </NavLink>
             </Text>
@@ -291,4 +428,4 @@ function SignIn() {
   );
 }
 
-export default SignIn;
+export default ResetPassword;

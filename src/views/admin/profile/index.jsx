@@ -35,8 +35,11 @@ import Upload from "views/admin/profile/components/Upload";
 import banner from "assets/img/auth/banner.png";
 import avatar from "assets/img/avatars/avatar4.png";
 import React from "react";
+import { useAuth } from "contexts/AuthContext";
 
 export default function Overview() {
+  const { user } = useAuth();
+  
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       {/* Main Fields */}
@@ -54,8 +57,8 @@ export default function Overview() {
           gridArea='1 / 1 / 2 / 2'
           banner={banner}
           avatar={avatar}
-          name='Adela Parkson'
-          job='Product Designer'
+          name={user?.getDisplayName() || 'User'}
+          job={user?.job || 'Product Designer'}
           posts='17'
           followers='9.7k'
           following='274'
@@ -92,8 +95,8 @@ export default function Overview() {
           gridArea='1 / 2 / 2 / 2'
           banner={banner}
           avatar={avatar}
-          name='Adela Parkson'
-          job='Product Designer'
+          name={user?.getDisplayName() || 'User'}
+          job={user?.job || 'Product Designer'}
           posts='17'
           followers='9.7k'
           following='274'

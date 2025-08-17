@@ -36,7 +36,7 @@ const TestComponent = () => {
       <span data-testid="authenticated">
         {auth.isAuthenticated ? 'authenticated' : 'not-authenticated'}
       </span>
-      <span data-testid="user">{auth.user?.username || 'no-user'}</span>
+      <span data-testid="user">{auth.user?.getDisplayName?.() || auth.user?.username || 'no-user'}</span>
       <span data-testid="error">{auth.error || 'no-error'}</span>
       <button
         data-testid="login-btn"
