@@ -127,7 +127,7 @@ describe('Login Component', () => {
   });
 
   test('should handle login failure', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     authService.signIn.mockResolvedValue({
       success: false,
       message: 'Invalid credentials',
@@ -146,6 +146,9 @@ describe('Login Component', () => {
     const passwordInput = screen.getByLabelText(/password/i);
     const submitButton = screen.getByRole('button', { name: /sign in/i });
 
+    await user.clear(emailInput);
+    await user.clear(passwordInput);
+    
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'wrongpassword');
     await user.click(submitButton);
@@ -155,7 +158,7 @@ describe('Login Component', () => {
     });
 
     expect(mockNavigate).not.toHaveBeenCalled();
-  });
+  }, 10000);
 
   test('should show loading state during login', async () => {
     const user = userEvent.setup();

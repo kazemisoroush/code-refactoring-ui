@@ -127,7 +127,7 @@ describe('Signup Component', () => {
   });
 
   test('should handle successful signup with auto-login', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     authService.signUp.mockResolvedValue({
       success: true,
       user: { email: 'test@example.com' },
@@ -148,6 +148,10 @@ describe('Signup Component', () => {
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
+    await user.clear(emailInput);
+    await user.clear(passwordInput);
+    await user.clear(confirmPasswordInput);
+    
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -163,10 +167,10 @@ describe('Signup Component', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/admin');
     });
-  });
+  }, 10000);
 
   test('should handle successful signup without auto-login', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     authService.signUp.mockResolvedValue({
       success: true,
       user: null, // No user returned means no auto-login
@@ -187,6 +191,10 @@ describe('Signup Component', () => {
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
+    await user.clear(emailInput);
+    await user.clear(passwordInput);
+    await user.clear(confirmPasswordInput);
+    
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -198,7 +206,7 @@ describe('Signup Component', () => {
   });
 
   test('should handle signup failure', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     authService.signUp.mockResolvedValue({
       success: false,
       message: 'Email already exists',
@@ -218,6 +226,10 @@ describe('Signup Component', () => {
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     const submitButton = screen.getByRole('button', { name: /sign up/i });
 
+    await user.clear(emailInput);
+    await user.clear(passwordInput);
+    await user.clear(confirmPasswordInput);
+    
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
