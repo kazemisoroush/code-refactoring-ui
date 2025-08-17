@@ -127,11 +127,11 @@ function SignUp() {
         navigate(from, { replace: true });
       } else {
         // Redirect to sign in page for manual login
-        navigate('/auth/sign-in', { 
-          state: { 
+        navigate('/auth/sign-in', {
+          state: {
             message: 'Account created successfully. Please sign in.',
-            email: email 
-          } 
+            email: email,
+          },
         });
       }
     }
@@ -259,7 +259,7 @@ function SignUp() {
                 {formErrors.email}
               </Text>
             )}
-            
+
             <FormLabel
               ms="4px"
               fontSize="sm"

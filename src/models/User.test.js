@@ -12,7 +12,7 @@ describe('User Model', () => {
         lastName: 'Doe',
         avatar: 'avatar.jpg',
         roles: ['user'],
-        customProp: 'custom value'
+        customProp: 'custom value',
       };
 
       const user = new User(userData);
@@ -74,7 +74,7 @@ describe('User Model', () => {
       const user = new User({
         name: 'Full Name',
         firstName: 'First',
-        lastName: 'Last'
+        lastName: 'Last',
       });
       expect(user.getDisplayName()).toBe('Full Name');
     });

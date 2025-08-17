@@ -151,7 +151,8 @@ function ForgotPassword() {
           >
             <Alert status="success" mb="20px" borderRadius="8px">
               <AlertIcon />
-              If an account with that email exists, we've sent you password reset instructions.
+              If an account with that email exists, we've sent you password
+              reset instructions.
             </Alert>
 
             <Flex
@@ -174,7 +175,12 @@ function ForgotPassword() {
                   </Text>
                 </NavLink>
               </Text>
-              <Text color={textColorDetails} fontWeight="400" fontSize="14px" mt="10px">
+              <Text
+                color={textColorDetails}
+                fontWeight="400"
+                fontSize="14px"
+                mt="10px"
+              >
                 Don't have an account?
                 <NavLink to="/auth/sign-up">
                   <Text
@@ -329,7 +335,12 @@ function ForgotPassword() {
                 </Text>
               </NavLink>
             </Text>
-            <Text color={textColorDetails} fontWeight="400" fontSize="14px" mt="10px">
+            <Text
+              color={textColorDetails}
+              fontWeight="400"
+              fontSize="14px"
+              mt="10px"
+            >
               Don't have an account?
               <NavLink to="/auth/sign-up">
                 <Text

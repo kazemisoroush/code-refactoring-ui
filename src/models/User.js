@@ -13,9 +13,9 @@ export class User {
     this.roles = userData?.roles || [];
     this.createdAt = userData?.createdAt;
     this.updatedAt = userData?.updatedAt;
-    
+
     // Copy any additional properties
-    Object.keys(userData || {}).forEach(key => {
+    Object.keys(userData || {}).forEach((key) => {
       if (!Object.prototype.hasOwnProperty.call(this, key)) {
         this[key] = userData[key];
       }
@@ -30,19 +30,19 @@ export class User {
     if (this.name) {
       return this.name;
     }
-    
+
     if (this.firstName || this.lastName) {
       return [this.firstName, this.lastName].filter(Boolean).join(' ');
     }
-    
+
     if (this.username) {
       return this.username;
     }
-    
+
     if (this.email) {
       return this.email;
     }
-    
+
     return 'User';
   }
 
@@ -51,22 +51,22 @@ export class User {
    */
   getInitials() {
     const displayName = this.getDisplayName();
-    
+
     if (displayName === 'User') {
       return 'U';
     }
-    
+
     // If it's an email, use the first letter of the local part
     if (displayName.includes('@')) {
       return displayName.charAt(0).toUpperCase();
     }
-    
+
     // For names, get first letter of each word
-    const words = displayName.split(' ').filter(word => word.length > 0);
+    const words = displayName.split(' ').filter((word) => word.length > 0);
     if (words.length >= 2) {
       return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
     }
-    
+
     return displayName.charAt(0).toUpperCase();
   }
 
@@ -77,23 +77,23 @@ export class User {
     if (this.firstName) {
       return this.firstName;
     }
-    
+
     if (this.name && this.name.includes(' ')) {
       return this.name.split(' ')[0];
     }
-    
+
     if (this.name) {
       return this.name;
     }
-    
+
     if (this.username) {
       return this.username;
     }
-    
+
     if (this.email) {
       return this.email.split('@')[0];
     }
-    
+
     return 'User';
   }
 
@@ -118,7 +118,7 @@ export class User {
     if (this.firstName || this.lastName) {
       return [this.firstName, this.lastName].filter(Boolean).join(' ');
     }
-    
+
     return this.name || this.getDisplayName();
   }
 }
@@ -136,12 +136,12 @@ export const createUser = (userData) => {
  */
 export const enhanceUser = (userData) => {
   if (!userData) return null;
-  
+
   // If it's already a User instance, return as is
   if (userData instanceof User) {
     return userData;
   }
-  
+
   // Create new User instance
   return new User(userData);
 };

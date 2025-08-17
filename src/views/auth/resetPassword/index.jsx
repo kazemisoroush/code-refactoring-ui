@@ -125,11 +125,12 @@ function ResetPassword() {
     const result = await resetPassword(email, code, newPassword);
     if (result.success) {
       // Redirect to sign in page with success message
-      navigate('/auth/sign-in', { 
-        state: { 
-          message: 'Password reset successfully. Please sign in with your new password.',
-          email: email 
-        } 
+      navigate('/auth/sign-in', {
+        state: {
+          message:
+            'Password reset successfully. Please sign in with your new password.',
+          email: email,
+        },
       });
     }
   };
@@ -234,7 +235,7 @@ function ResetPassword() {
                 {error}
               </Alert>
             )}
-            
+
             <FormLabel
               display="flex"
               ms="4px"
@@ -293,7 +294,7 @@ function ResetPassword() {
                 {formErrors.code}
               </Text>
             )}
-            
+
             <FormLabel
               ms="4px"
               fontSize="sm"
@@ -402,7 +403,12 @@ function ResetPassword() {
                 </Text>
               </NavLink>
             </Text>
-            <Text color={textColorDetails} fontWeight="400" fontSize="14px" mt="10px">
+            <Text
+              color={textColorDetails}
+              fontWeight="400"
+              fontSize="14px"
+              mt="10px"
+            >
               Don't have an account?
               <NavLink to="/auth/sign-up">
                 <Text
