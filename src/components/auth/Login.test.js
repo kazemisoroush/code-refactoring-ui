@@ -148,7 +148,7 @@ describe('Login Component', () => {
 
     await user.clear(emailInput);
     await user.clear(passwordInput);
-    
+
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'wrongpassword');
     await user.click(submitButton);

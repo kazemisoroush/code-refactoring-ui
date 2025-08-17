@@ -151,7 +151,7 @@ describe('Signup Component', () => {
     await user.clear(emailInput);
     await user.clear(passwordInput);
     await user.clear(confirmPasswordInput);
-    
+
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -194,7 +194,7 @@ describe('Signup Component', () => {
     await user.clear(emailInput);
     await user.clear(passwordInput);
     await user.clear(confirmPasswordInput);
-    
+
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
@@ -229,7 +229,7 @@ describe('Signup Component', () => {
     await user.clear(emailInput);
     await user.clear(passwordInput);
     await user.clear(confirmPasswordInput);
-    
+
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
