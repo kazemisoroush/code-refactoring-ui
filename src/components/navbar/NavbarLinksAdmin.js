@@ -26,9 +26,22 @@ import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
+import { useAuth } from 'contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 export default function HeaderLinks(props) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth/sign-in');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   // Chakra Color Mode
   const navbarIcon = useColorModeValue('gray.400', 'white');
   let menuBg = useColorModeValue('white', 'navy.800');
@@ -243,7 +256,7 @@ export default function HeaderLinks(props) {
           <Avatar
             _hover={{ cursor: 'pointer' }}
             color="white"
-            name="Adela Parkson"
+            name={user?.name || user?.email || 'User'}
             bg="#11047A"
             size="sm"
             w="40px"
@@ -270,7 +283,7 @@ export default function HeaderLinks(props) {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; Hey, Adela
+              👋&nbsp; Hey, {user?.name || user?.email || 'User'}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
@@ -296,6 +309,7 @@ export default function HeaderLinks(props) {
               color="red.400"
               borderRadius="8px"
               px="14px"
+              onClick={handleLogout}
             >
               <Text fontSize="sm">Log out</Text>
             </MenuItem>

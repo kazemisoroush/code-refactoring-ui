@@ -55,6 +55,10 @@ const routes = [
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <Profile />,
   },
+];
+
+// Keep auth routes separate for routing purposes but exclude from sidebar
+export const authRoutes = [
   {
     name: 'Sign In',
     layout: '/auth',
