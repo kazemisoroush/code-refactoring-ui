@@ -1,9 +1,10 @@
 // Chakra imports
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Footer from 'components/footer/FooterAuth';
 import FixedPlugin from 'components/fixedPlugin/FixedPlugin';
+import { BRAND_NAME } from 'constants/branding';
 
 function AuthIllustration(props) {
   const { children, illustrationBackground } = props;
@@ -38,14 +39,28 @@ function AuthIllustration(props) {
           <Flex
             bg={`url(${illustrationBackground})`}
             justify="center"
-            align="end"
+            align="center"
             w="100%"
             h="100%"
             bgSize="cover"
             bgPosition="50%"
             position="absolute"
             borderBottomLeftRadius={{ lg: '120px', xl: '200px' }}
-          ></Flex>
+            direction="column"
+          >
+            <Box flex="1" />
+            <Text
+              color="white"
+              fontSize={{ base: '24px', md: '32px', lg: '40px' }}
+              fontWeight="bold"
+              textAlign="center"
+              mt="140px"
+              textShadow="0 2px 4px rgba(0,0,0,0.3)"
+            >
+              {BRAND_NAME}
+            </Text>
+            <Box flex="1" />
+          </Flex>
         </Box>
         <Footer />
       </Flex>

@@ -1,4 +1,4 @@
-// Chakra imports
+// UI imports
 import { Portal, Box, useDisclosure } from '@chakra-ui/react';
 import Footer from 'components/footer/FooterAdmin';
 // Layout components
@@ -8,8 +8,9 @@ import { SidebarContext } from 'contexts/SidebarContext';
 import React, { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import routes from 'routes';
+import { BRAND_NAME } from '../../constants/branding';
 
-// Custom Chakra theme
+// Custom UI theme
 export default function Dashboard(props) {
   const { ...rest } = props;
   // states and functions
@@ -133,7 +134,7 @@ export default function Dashboard(props) {
               <Box>
                 <Navbar
                   onOpen={onOpen}
-                  logoText={'Horizon UI Dashboard PRO'}
+                  logoText={`${BRAND_NAME} Dashboard PRO`}
                   brandText={getActiveRoute(routes)}
                   secondary={getActiveNavbar(routes)}
                   message={getActiveNavbarText(routes)}
