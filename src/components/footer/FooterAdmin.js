@@ -1,5 +1,5 @@
 /*eslint-disable*/
-import React from "react";
+import React from 'react';
 import {
   Flex,
   Link,
@@ -9,88 +9,99 @@ import {
   Button,
   useColorMode,
   useColorModeValue,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+import { BRAND_NAME, BRAND_URL } from '../../constants/branding';
 
 export default function Footer() {
-  const textColor = useColorModeValue("gray.400", "white");
+  const textColor = useColorModeValue('gray.400', 'white');
   const { toggleColorMode } = useColorMode();
   return (
     <Flex
-      zIndex='3'
+      zIndex="3"
       flexDirection={{
-        base: "column",
-        xl: "row",
+        base: 'column',
+        xl: 'row',
       }}
       alignItems={{
-        base: "center",
-        xl: "start",
+        base: 'center',
+        xl: 'start',
       }}
-      justifyContent='space-between'
-      px={{ base: "30px", md: "50px" }}
-      pb='30px'>
+      justifyContent="space-between"
+      px={{ base: '30px', md: '50px' }}
+      pb="30px"
+    >
       <Text
         color={textColor}
         textAlign={{
-          base: "center",
-          xl: "start",
+          base: 'center',
+          xl: 'start',
         }}
-        mb={{ base: "20px", xl: "0px" }}>
-        {" "}
+        mb={{ base: '20px', xl: '0px' }}
+      >
+        {' '}
         &copy; {1900 + new Date().getYear()}
-        <Text as='span' fontWeight='500' ms='4px'>
-          Horizon UI. All Rights Reserved. Made with love by
+        <Text as="span" fontWeight="500" ms="4px">
+          {BRAND_NAME}. All Rights Reserved. Made with love by
           <Link
-            mx='3px'
+            mx="3px"
             color={textColor}
-            href='https://www.simmmple.com?ref=horizon-chakra-free'
-            target='_blank'
-            fontWeight='700'>
-            Simmmple!
+            href={`https://${BRAND_URL}/?ref=refactra-free`}
+            target="_blank"
+            fontWeight="700"
+          >
+            {BRAND_NAME} Team!
           </Link>
         </Text>
       </Text>
-      <List display='flex'>
+      <List display="flex">
         <ListItem
           me={{
-            base: "20px",
-            md: "44px",
-          }}>
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
+            fontWeight="500"
             color={textColor}
-            href='mailto:hello@simmmple.com'>
+            href={`mailto:hello@${BRAND_URL}`}
+          >
             Support
           </Link>
         </ListItem>
         <ListItem
           me={{
-            base: "20px",
-            md: "44px",
-          }}>
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
+            fontWeight="500"
             color={textColor}
-            href='https://www.simmmple.com/licenses?ref=horizon-chakra-free'>
+            href={`https://${BRAND_URL}/licenses?ref=refactra-free`}
+          >
             License
           </Link>
         </ListItem>
         <ListItem
           me={{
-            base: "20px",
-            md: "44px",
-          }}>
+            base: '20px',
+            md: '44px',
+          }}
+        >
           <Link
-            fontWeight='500'
+            fontWeight="500"
             color={textColor}
-            href='https://simmmple.com/terms-of-service?ref=horizon-chakra-free'>
+            href={`https://${BRAND_URL}/terms-of-service?ref=refactra-free`}
+          >
             Terms of Use
           </Link>
         </ListItem>
         <ListItem>
           <Link
-            fontWeight='500'
+            fontWeight="500"
             color={textColor}
-            href='https://www.blog.simmmple.com/?ref=horizon-chakra-free'>
+            href={`https://blog.${BRAND_URL}/?ref=refactra-free`}
+          >
             Blog
           </Link>
         </ListItem>

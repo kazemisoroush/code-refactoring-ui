@@ -1,4 +1,4 @@
-// Chakra Imports
+// UI Imports
 import {
   Avatar,
   Button,
@@ -28,6 +28,7 @@ import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
 import { useAuth } from 'contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { BRAND_NAME, BRAND_URL } from '../../constants/branding';
 export default function HeaderLinks(props) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
@@ -42,7 +43,7 @@ export default function HeaderLinks(props) {
       console.error('Logout failed:', error);
     }
   };
-  // Chakra Color Mode
+  // UI Color Mode
   const navbarIcon = useColorModeValue('gray.400', 'white');
   let menuBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -156,7 +157,7 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               mb="10px"
             >
-              <ItemContent info="Horizon UI Dashboard PRO" />
+              <ItemContent info={`${BRAND_NAME} Dashboard PRO`} />
             </MenuItem>
             <MenuItem
               _hover={{ bg: 'none' }}
@@ -195,14 +196,14 @@ export default function HeaderLinks(props) {
         >
           <Image src={navImage} borderRadius="16px" mb="28px" />
           <Flex flexDirection="column">
-            <Link w="100%" href="https://horizon-ui.com/pro">
+            <Link w="100%" href={`https://${BRAND_URL}/pro`}>
               <Button w="100%" h="44px" mb="10px" variant="brand">
-                Buy Horizon UI PRO
+                Buy {BRAND_NAME} PRO
               </Button>
             </Link>
             <Link
               w="100%"
-              href="https://horizon-ui.com/documentation/docs/introduction"
+              href={`https://${BRAND_URL}/documentation/docs/introduction`}
             >
               <Button
                 w="100%"
@@ -217,7 +218,7 @@ export default function HeaderLinks(props) {
             </Link>
             <Link
               w="100%"
-              href="https://github.com/horizon-ui/horizon-ui-chakra-ts"
+              href={`https://github.com/${BRAND_URL}/${BRAND_NAME.toLowerCase()}-ui-ts`}
             >
               <Button
                 w="100%"
@@ -226,7 +227,7 @@ export default function HeaderLinks(props) {
                 color={textColor}
                 bg="transparent"
               >
-                Try Horizon Free
+                Try {BRAND_NAME} Free
               </Button>
             </Link>
           </Flex>

@@ -1,19 +1,19 @@
 /* eslint-disable */
 /*!
-  _   _  ___  ____  ___ ________  _   _   _   _ ___   
- | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
- | |_| | | | | |_) || |  / / | | |  \| | | | | || | 
- |  _  | |_| |  _ < | | / /| |_| | |\  | | |_| || |
- |_| |_|\___/|_| \_\___/____\___/|_| \_|  \___/|___|
+ ____  _____ _____ _    ____ _____ ____    _    
+|  _ \| ____|  ___/ \  / ___|_   _|  _ \  / \   
+| |_) |  _| | |_ / _ \| |     | | | |_) |/ _ \  
+|  _ <| |___|  _/ ___ \ |___  | | |  _ </ ___ \ 
+|_| \_\_____|_|/_/   \_\____| |_| |_| \_\_/   \_\
                                                                                                                                                                                                                                                                                                                                        
 =========================================================
-* Horizon UI - v1.1.0
+* Refactra Dashboard - v1.0.0
 =========================================================
 
-* Product Page: https://www.horizon-ui.com/
-* Copyright 2023 Horizon UI (https://www.horizon-ui.com/)
+* Product Page: https://www.refactra.com/
+* Copyright 2025 Refactra Team (https://www.refactra.com/)
 
-* Designed and Coded by Simmmple
+* Designed and Coded by Refactra Team
 
 =========================================================
 
@@ -246,7 +246,7 @@ function SignUp() {
               fontSize="sm"
               ms={{ base: '0px', md: '0px' }}
               type="email"
-              placeholder="mail@simmmple.com"
+              placeholder="your.email@example.com"
               mb={formErrors.email ? '8px' : '24px'}
               fontWeight="500"
               size="lg"

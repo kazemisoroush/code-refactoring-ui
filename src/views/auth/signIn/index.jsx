@@ -1,19 +1,19 @@
 /* eslint-disable */
 /*!
-  _   _  ___  ____  ___ ________  _   _   _   _ ___   
- | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
- | |_| | | | | |_) || |  / / | | |  \| | | | | || | 
- |  _  | |_| |  _ < | | / /| |_| | |\  | | |_| || |
- |_| |_|\___/|_| \_\___/____\___/|_| \_|  \___/|___|
+ ____  _____ _____ _    ____ _____ ____    _    
+|  _ \| ____|  ___/ \  / ___|_   _|  _ \  / \   
+| |_) |  _| | |_ / _ \| |     | | | |_) |/ _ \  
+|  _ <| |___|  _/ ___ \ |___  | | |  _ </ ___ \ 
+|_| \_\_____|_|/_/   \_\____| |_| |_| \_\_/   \_\
                                                                                                                                                                                                                                                                                                                                        
 =========================================================
-* Horizon UI - v1.1.0
+* Refactra Dashboard - v1.0.0
 =========================================================
 
-* Product Page: https://www.horizon-ui.com/
-* Copyright 2023 Horizon UI (https://www.horizon-ui.com/)
+* Product Page: https://www.refactra.com/
+* Copyright 2025 Refactra Team (https://www.refactra.com/)
 
-* Designed and Coded by Simmmple
+* Designed and Coded by Refactra Team
 
 =========================================================
 
@@ -23,7 +23,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-// Chakra imports
+// UI imports
 import {
   Box,
   Button,
@@ -52,7 +52,7 @@ import { RiEyeCloseLine } from 'react-icons/ri';
 import { useAuth } from 'contexts/AuthContext';
 
 function SignIn() {
-  // Chakra color mode
+  // UI color mode
   const textColor = useColorModeValue('navy.700', 'white');
   const textColorSecondary = 'gray.400';
   const textColorDetails = useColorModeValue('navy.700', 'secondaryGray.600');
@@ -185,7 +185,7 @@ function SignIn() {
               fontSize="sm"
               ms={{ base: '0px', md: '0px' }}
               type="email"
-              placeholder="mail@simmmple.com"
+              placeholder="user@email.com"
               mb="24px"
               fontWeight="500"
               size="lg"
